@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>INTELLEA | Multidimensional Intelligence for Education</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+  </head>
+  <body>
+
+    <!-- NAV -->
+    <nav class="navbar" id="navbar">
+      <div class="nav-inner">
+        <a href="#hero" class="nav-logo">
+          <div class="logo-mark">
+            <svg width="22" height="22" viewBox="0 0 100 100" fill="none">
+              <defs><linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#60a5fa"/><stop offset="100%" stop-color="#2563eb"/></linearGradient></defs>
+              <path d="M50 8L12 88H36L50 55L64 88H88L50 8Z" fill="url(#lg)" />
+            </svg>
+          </div>
+          <span class="logo-wordmark">INTELLEA</span>
+        </a>
+        <div class="nav-links">
+          <a href="#vision" class="nav-link">Vision</a>
+          <a href="#innovations" class="nav-link">Innovations</a>
+          <a href="#research" class="nav-link">Research</a>
+          <a href="#modules" class="nav-link">Modules</a>
+        </div>
+        <div class="nav-actions">
+          <a href="#cta" class="nav-cta">Get Started <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+          <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+        </div>
+      </div>
+      <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-inner">
+          <a href="#vision">Vision</a>
+          <a href="#innovations">Innovations</a>
+          <a href="#research">Research</a>
+          <a href="#modules">Modules</a>
+          <a href="#cta" class="mobile-cta">Get Started</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero" id="hero">
+      <canvas id="heroCanvas"></canvas>
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="hero-badge" id="heroBadge"><span class="hero-badge-dot"></span>Research Project 2025/26</div>
+        <h1 class="hero-title" id="heroTitle">Multidimensional<br>Intelligence for<br><span class="hero-title-gradient">Education</span></h1>
+        <p class="hero-subtitle" id="heroSubtitle">The only platform integrating configurable Socratic pedagogy, multiagent specialist grading, real time tri modal emotion recognition, and a semantically unified Block Code IDE within a single teacher controlled architecture.</p>
+        <div class="hero-actions" id="heroActions">
+          <a href="#innovations" class="btn btn--primary btn--lg">Explore Innovations <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a>
+          <a href="#research" class="btn btn--ghost btn--lg">View Research</a>
+        </div>
+      </div>
+      <div class="hero-scroll-indicator" id="heroScroll"><span>Scroll</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></div>
+    </section>
+
+    <!-- CHALLENGE -->
+    <section class="section" id="challenge">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-eyebrow">The Challenge</span>
+          <h2 class="section-title">Education hasn't kept up<br>with the pace of AI</h2>
+          <p class="section-desc">Students learn differently. Teachers are overwhelmed. Content is static. Assessment is one size fits all. INTELLEA was built to change that.</p>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-value"><span class="stat-number" data-count="73">0</span><span class="stat-suffix">%</span></div><p class="stat-label">of educators say they lack time for personalized instruction</p></div>
+          <div class="stat-card"><div class="stat-value"><span class="stat-number" data-count="4">0</span><span class="stat-suffix">x</span></div><p class="stat-label">faster learning with adaptive AI driven tutoring systems</p></div>
+          <div class="stat-card"><div class="stat-value"><span class="stat-number" data-count="23">0</span><span class="stat-suffix">%</span></div><p class="stat-label">better retention with Socratic dialogue over traditional lectures</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISION -->
+    <section class="section section--dark" id="vision">
+      <div class="container">
+        <div class="vision-layout">
+          <div class="vision-text">
+            <span class="section-eyebrow section-eyebrow--light">The Platform</span>
+            <h2 class="section-title section-title--light">What no other<br>platform offers</h2>
+            <p class="vision-desc">INTELLEA's innovation lies in its multidimensional intelligence integration. While commercial platforms demonstrate significant capability in one or two dimensions, none integrate configurable Socratic pedagogy, multiagent specialist grading, real time tri modal emotion recognition, and a semantically unified Block Code IDE within a single teacher controlled architecture.</p>
+            <p class="vision-desc">The separation of instructor intent from student state is a key design principle: the configured style governs the mode of interaction while BKT mastery estimates and emotional analysis influence the intensity and scaffolding within that style.</p>
+          </div>
+          <div class="vision-pillars">
+            <div class="pillar-card" data-target="persona"><span class="pillar-num">01</span><h4>Configurable Teacher Persona</h4><p>Four pedagogically grounded teaching styles with continuous scalar parameters</p><span class="pillar-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg></span></div>
+            <div class="pillar-card" data-target="emotion"><span class="pillar-num">02</span><h4>Tri Modal Emotion Fusion</h4><p>Feed Forward Neural Network across facial, speech, and text modalities</p><span class="pillar-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg></span></div>
+            <div class="pillar-card" data-target="sage"><span class="pillar-num">03</span><h4>SAGE Assessment Engine</h4><p>Follow through marking with reference solution validated test cases</p><span class="pillar-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg></span></div>
+            <div class="pillar-card" data-target="blockcode"><span class="pillar-num">04</span><h4>Block Code IDE</h4><p>Single AST backed deterministic translation ensuring semantic equivalence</p><span class="pillar-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg></span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INNOVATION 01: TEACHER PERSONA -->
+    <section class="section" id="innovations">
+      <div class="container">
+        <div class="innovation-compact">
+          <div class="innovation-header">
+            <span class="innovation-num">01</span>
+            <span class="section-eyebrow">Core Innovation</span>
+            <h2 class="section-title">Configurable Teacher Persona System</h2>
+          </div>
+          <div class="innovation-content-row">
+            <div class="innovation-text-col">
+              <p class="innovation-desc">Rather than enforcing a single interaction paradigm, the system exposes four pedagogically grounded teaching styles with continuous scalar parameters, producing an effectively unlimited persona space.</p>
+              <p class="innovation-desc">A supervisor agent validates every generated response for style fidelity through a cyclic review mechanism, ensuring pedagogical constraints are maintained across all interactions.</p>
+            </div>
+            <div class="innovation-visual-col">
+              <div class="persona-demo" id="personaDemo">
+                <div class="persona-styles">
+                  <button class="style-card style-card--active" data-style="socratic" type="button">
+                    <span class="style-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span><span class="style-label">Socratic</span>
+                  </button>
+                  <button class="style-card" data-style="direct" type="button">
+                    <span class="style-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span><span class="style-label">Direct</span>
+                  </button>
+                  <button class="style-card" data-style="collab" type="button">
+                    <span class="style-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="style-label">Collaborative</span>
+                  </button>
+                  <button class="style-card" data-style="scaffold" type="button">
+                    <span class="style-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></span><span class="style-label">Scaffolded</span>
+                  </button>
+                </div>
+                <div class="persona-params" id="personaParams">
+                  <div class="param-row"><span class="param-name">Patience</span><div class="param-track"><div class="param-fill" id="fill-patience" style="width:0"></div></div><span class="param-val" id="val-patience">7</span></div>
+                  <div class="param-row"><span class="param-name">Encouragement</span><div class="param-track"><div class="param-fill" id="fill-encourage" style="width:0"></div></div><span class="param-val" id="val-encourage">8.5</span></div>
+                  <div class="param-row"><span class="param-name">Formality</span><div class="param-track"><div class="param-fill" id="fill-formality" style="width:0"></div></div><span class="param-val" id="val-formality">4.5</span></div>
+                  <div class="param-row"><span class="param-name">Hint Depth</span><div class="param-track"><div class="param-fill" id="fill-hint" style="width:0"></div></div><span class="param-val" id="val-hint">6</span></div>
+                </div>
+                <div class="persona-chat" id="personaChat">
+                  <div class="chat-bubble chat-bubble--bot">What do you think would happen if we changed the loop condition here?</div>
+                </div>
+                <div class="supervisor-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Supervisor Agent validates every response</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INNOVATION 02: EMOTION FUSION -->
+    <section class="section section--muted" id="emotion">
+      <div class="container">
+        <div class="innovation-compact">
+          <div class="innovation-header">
+            <span class="innovation-num">02</span>
+            <span class="section-eyebrow">Core Innovation</span>
+            <h2 class="section-title">Tri Modal Emotion Fusion</h2>
+          </div>
+          <div class="innovation-content-row">
+            <div class="innovation-text-col">
+              <p class="innovation-desc">Single modality systems suffer from well documented limitations. Facial analysis is vulnerable to occlusion, speech systems are sensitive to noise, and text systems miss prosodic cues.</p>
+              <p class="innovation-desc">INTELLEA's Feed Forward Neural Network learns the weighted importance of each modality alongside confidence scores, dynamically compensating when individual modalities are unreliable.</p>
+              <div class="emotion-outcomes">
+                <div class="emotion-tag">Confident</div>
+                <div class="emotion-tag">Confused</div>
+                <div class="emotion-tag">Frustrated</div>
+                <div class="emotion-tag">Curious</div>
+                <div class="emotion-tag">Disengaged</div>
+              </div>
+            </div>
+            <div class="innovation-visual-col">
+              <div class="fusion-diagram" id="fusionDiagram">
+                <div class="fusion-stage fusion-stage--inputs">
+                  <div class="fusion-input" data-modality="face">
+                    <div class="fusion-input-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+                    <div class="fusion-input-info">
+                      <span class="fusion-input-name">Facial Analysis</span>
+                      <div class="fusion-bar"><div class="fusion-bar-fill" id="bar-face" data-target="87"></div></div>
+                      <span class="fusion-conf">0.87</span>
+                    </div>
+                  </div>
+                  <div class="fusion-input" data-modality="voice">
+                    <div class="fusion-input-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div>
+                    <div class="fusion-input-info">
+                      <span class="fusion-input-name">Speech Processing</span>
+                      <div class="fusion-bar"><div class="fusion-bar-fill" id="bar-voice" data-target="72"></div></div>
+                      <span class="fusion-conf">0.72</span>
+                    </div>
+                  </div>
+                  <div class="fusion-input" data-modality="text">
+                    <div class="fusion-input-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+                    <div class="fusion-input-info">
+                      <span class="fusion-input-name">Text Sentiment</span>
+                      <div class="fusion-bar"><div class="fusion-bar-fill" id="bar-text" data-target="94"></div></div>
+                      <span class="fusion-conf">0.94</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="fusion-stage fusion-stage--lines">
+                  <svg class="fusion-connector-svg" viewBox="0 0 60 180" fill="none">
+                    <line x1="0" y1="30" x2="60" y2="90" class="fusion-line fusion-line-1" stroke-width="2"/>
+                    <line x1="0" y1="90" x2="60" y2="90" class="fusion-line fusion-line-2" stroke-width="2"/>
+                    <line x1="0" y1="150" x2="60" y2="90" class="fusion-line fusion-line-3" stroke-width="2"/>
+                  </svg>
+                </div>
+                <div class="fusion-stage fusion-stage--core">
+                  <div class="fusion-core">
+                    <div class="fusion-core-ring"></div>
+                    <span class="fusion-core-label">FFNN</span>
+                    <span class="fusion-core-sub">Weighted Fusion</span>
+                  </div>
+                </div>
+                <div class="fusion-stage fusion-stage--arrow">
+                  <svg class="fusion-out-svg" viewBox="0 0 60 20" fill="none">
+                    <line x1="0" y1="10" x2="50" y2="10" class="fusion-line fusion-line-out" stroke-width="2"/>
+                    <polygon points="48,5 58,10 48,15" class="fusion-arrow-head"/>
+                  </svg>
+                </div>
+                <div class="fusion-stage fusion-stage--output">
+                  <div class="fusion-result">
+                    <span class="fusion-result-label">Adaptive Response</span>
+                    <span class="fusion-result-emotion" id="fusionEmotionResult">Confident</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INNOVATION 03: SAGE -->
+    <section class="section" id="sage">
+      <div class="container">
+        <div class="innovation-compact">
+          <div class="innovation-header">
+            <span class="innovation-num">03</span>
+            <span class="section-eyebrow">Core Innovation</span>
+            <h2 class="section-title">SAGE Assessment Engine</h2>
+          </div>
+          <div class="innovation-content-row">
+            <div class="innovation-text-col">
+              <p class="innovation-desc">SAGE introduces several novel assessment mechanisms that address gaps identified in current literature and mirror academic conventions that prior automated systems have ignored.</p>
+              <div class="sage-features">
+                <div class="sage-feature"><div class="sage-feature-header"><span class="sage-feature-badge">Novel</span><h4>Follow Through Marking</h4></div><p>Awards partial credit when students apply correct reasoning from incorrect intermediate results.</p></div>
+                <div class="sage-feature"><div class="sage-feature-header"><span class="sage-feature-badge">Novel</span><h4>Reference Validated Test Cases</h4></div><p>LLM generated test cases validated against reference solutions eliminate hallucinated ground truth.</p></div>
+                <div class="sage-feature"><div class="sage-feature-header"><span class="sage-feature-badge">Novel</span><h4>Harness Injection</h4></div><p>Function level automated assessment across multiple programming languages.</p></div>
+              </div>
+            </div>
+            <div class="innovation-visual-col">
+              <div class="sage-pipeline" id="sagePipeline">
+                <div class="sage-track">
+                  <div class="sage-track-fill" id="sageTrackFill"></div>
+                  <div class="sage-particle" id="sageParticle"></div>
+                </div>
+                <div class="sage-steps">
+                  <div class="sage-step" data-step="1">
+                    <div class="sage-step-dot"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/></svg></div>
+                    <div class="sage-step-content">
+                      <h4>Submit</h4>
+                      <p>Student submits code or written answer for assessment</p>
+                    </div>
+                  </div>
+                  <div class="sage-step" data-step="2">
+                    <div class="sage-step-dot"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+                    <div class="sage-step-content">
+                      <h4>Analyze</h4>
+                      <p>Parse reasoning chain and detect problem solving strategy</p>
+                    </div>
+                  </div>
+                  <div class="sage-step" data-step="3">
+                    <div class="sage-step-dot"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+                    <div class="sage-step-content">
+                      <h4>Grade</h4>
+                      <p>Multiagent specialists independently review each component</p>
+                    </div>
+                  </div>
+                  <div class="sage-step" data-step="4">
+                    <div class="sage-step-dot"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                    <div class="sage-step-content">
+                      <h4>Report</h4>
+                      <p>Detailed feedback with partial credit and improvement paths</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="sage-follow-through">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  Follow Through: Correct reasoning from wrong intermediates still earns credit
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INNOVATION 04: BLOCK CODE IDE -->
+    <section class="section section--muted" id="blockcode">
+      <div class="container">
+        <div class="innovation-compact">
+          <div class="innovation-header">
+            <span class="innovation-num">04</span>
+            <span class="section-eyebrow">Core Innovation</span>
+            <h2 class="section-title">Hybrid Block Code IDE</h2>
+          </div>
+          <div class="innovation-content-row">
+            <div class="innovation-text-col">
+              <p class="innovation-desc">The single AST backed deterministic translation ensures semantic equivalence between visual block programming and traditional code. Submissions in either modality remain analytically comparable through explicit coupling with both the SAGE assessment engine and the ATLAS tutoring system.</p>
+              <ul class="blockcode-highlights">
+                <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Deterministic bidirectional translation between blocks and code</li>
+                <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Single Abstract Syntax Tree ensures semantic equivalence</li>
+                <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>Coupled with SAGE and ATLAS for assessment and tutoring</li>
+              </ul>
+            </div>
+            <div class="innovation-visual-col">
+              <div class="ide-visual">
+                <div class="ide-pane ide-pane--blocks">
+                  <div class="ide-pane-header"><span class="ide-dot ide-dot--r"></span><span class="ide-dot ide-dot--y"></span><span class="ide-dot ide-dot--g"></span><span class="ide-pane-title">Blocks</span></div>
+                  <div class="ide-pane-body">
+                    <div class="block-row"><div class="block block--dark">define greet(name)</div></div>
+                    <div class="block-row block-row--indent"><div class="block block--mid">set msg = "Hello, " + name</div></div>
+                    <div class="block-row block-row--indent"><div class="block block--light">return msg</div></div>
+                  </div>
+                </div>
+                <div class="ide-bridge"><div class="ide-bridge-inner"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg><span class="ide-bridge-label">AST</span></div></div>
+                <div class="ide-pane ide-pane--code">
+                  <div class="ide-pane-header"><span class="ide-dot ide-dot--r"></span><span class="ide-dot ide-dot--y"></span><span class="ide-dot ide-dot--g"></span><span class="ide-pane-title">Code</span></div>
+                  <div class="ide-pane-body ide-code-body">
+                    <div class="code-line"><span class="kw">def</span> <span class="fn">greet</span>(name):</div>
+                    <div class="code-line code-indent"><span class="var">msg</span> = <span class="str">"Hello, "</span> + name</div>
+                    <div class="code-line code-indent"><span class="kw">return</span> msg</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESEARCH FOUNDATIONS -->
+    <section class="section section--dark" id="research">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-eyebrow section-eyebrow--light">Research Foundations</span>
+          <h2 class="section-title section-title--light">Grounded in<br>learning science</h2>
+          <p class="section-desc section-desc--light">The operationalization of Cognitive Constructivist Learning Theories through configurable agentic frameworks translates established pedagogical theory into computational architecture.</p>
+        </div>
+        <div class="research-grid">
+          <div class="research-card" id="researchBKT">
+            <canvas class="research-canvas" id="canvasBKT"></canvas>
+            <div class="research-card-content">
+              <div class="research-card-badge">BKT</div>
+              <h4>Bayesian Knowledge Tracing</h4>
+              <p>Probabilistic model estimating student mastery using prior knowledge, learn rate, guess and slip parameters to track knowledge state evolution.</p>
+              <div class="formula-block"><code>P(L&#8345;) = P(L&#8345;&#8331;&#8321;|obs) + (1 &minus; P(L&#8345;&#8331;&#8321;|obs)) &middot; P(T)</code></div>
+            </div>
+          </div>
+          <div class="research-card" id="researchZPD">
+            <canvas class="research-canvas" id="canvasZPD"></canvas>
+            <div class="research-card-content">
+              <div class="research-card-badge">ZPD</div>
+              <h4>Zone of Proximal Development</h4>
+              <p>Vygotsky's ZPD implemented as a computable score, selecting content that is "just challenging enough" for optimal growth within each learner's current boundary.</p>
+              <div class="zpd-visual">
+                <div class="zpd-ring zpd-ring--outer"></div>
+                <div class="zpd-ring zpd-ring--mid"></div>
+                <div class="zpd-ring zpd-ring--inner"></div>
+                <span class="zpd-label zpd-label--outer">Beyond Reach</span>
+                <span class="zpd-label zpd-label--mid">ZPD</span>
+                <span class="zpd-label zpd-label--inner">Known</span>
+              </div>
+            </div>
+          </div>
+          <div class="research-card" id="researchRAG">
+            <canvas class="research-canvas" id="canvasRAG"></canvas>
+            <div class="research-card-content">
+              <div class="research-card-badge">RAG</div>
+              <h4>Socratic Strategies + RAG</h4>
+              <p>Collins and Stevens' Socratic strategies formalized as LLM prompt constraints, with all outputs grounded in course specific knowledge through Retrieval Augmented Generation.</p>
+              <div class="rag-vis">
+                <div class="rag-step">Course Materials</div>
+                <div class="rag-arr"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></div>
+                <div class="rag-step">Vector Embeddings</div>
+                <div class="rag-arr"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></div>
+                <div class="rag-step rag-step--hl">Grounded Response</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULES -->
+    <section class="section" id="modules">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-eyebrow">Platform Modules</span>
+          <h2 class="section-title">Five integrated<br>AI modules</h2>
+          <p class="section-desc">A complete ecosystem covering intelligent education from content ingestion to adaptive tutoring, automated assessment, and real time analytics.</p>
+        </div>
+        <div class="modules-grid">
+          <div class="module-card"><div class="module-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div><h3>KBase</h3><p class="module-sub">Knowledge Base Constructor</p><p class="module-detail">Multi format document processing with semantic chunking and Pinecone vector search for RAG powered context retrieval.</p></div>
+          <div class="module-card"><div class="module-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><h3>ACE Engine</h3><p class="module-sub">Assignment Creation Engine</p><p class="module-detail">AI powered question generation with Bloom's Taxonomy targeting, LangGraph validation, and 7 question types.</p></div>
+          <div class="module-card"><div class="module-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><h3>Virtual Teacher</h3><p class="module-sub">ATLAS Adaptive Tutoring</p><p class="module-detail">Four teaching styles with Bayesian Knowledge Tracing, emotional awareness, and supervisor agent validation.</p></div>
+          <div class="module-card"><div class="module-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><h3>Question Assistant</h3><p class="module-sub">Lightweight Tutoring</p><p class="module-detail">Stateless, context switching assistant with progressive hint system and RAG integrated course material awareness.</p></div>
+          <div class="module-card"><div class="module-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div><h3>Block Editor</h3><p class="module-sub">AI Enhanced Block IDE</p><p class="module-detail">Visual block programming with deterministic code translation, powered by a single AST that ensures semantic equivalence across modalities.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section cta-section" id="cta">
+      <canvas id="ctaCanvas"></canvas>
+      <div class="container">
+        <div class="cta-content">
+          <span class="section-eyebrow section-eyebrow--light">Get Involved</span>
+          <h2 class="cta-title">Ready to explore the future<br>of intelligent education?</h2>
+          <p class="cta-desc">INTELLEA is an open research project. Explore the codebase, read the paper, or deploy your own instance.</p>
+          <div class="cta-stats">
+            <div class="cta-stat"><span class="cta-stat-val">4</span><span class="cta-stat-label">Core Innovations</span></div>
+            <div class="cta-stat"><span class="cta-stat-val">5</span><span class="cta-stat-label">AI Modules</span></div>
+            <div class="cta-stat"><span class="cta-stat-val">3</span><span class="cta-stat-label">Emotion Modalities</span></div>
+            <div class="cta-stat"><span class="cta-stat-val">4</span><span class="cta-stat-label">Teaching Styles</span></div>
+          </div>
+          <div class="cta-actions">
+            <a href="#" class="btn btn--white btn--lg"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65S8.93 17.38 9 18v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>View on GitHub</a>
+            <a href="#research" class="btn btn--ghost-light btn--lg">Read the Research</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand"><div class="footer-logo"><svg width="20" height="20" viewBox="0 0 100 100" fill="none"><path d="M50 8L12 88H36L50 55L64 88H88L50 8Z" fill="#60a5fa"/></svg><span>INTELLEA</span></div><p>Intelligent Teaching and Learning<br>Enhancement Architecture</p></div>
+          <div class="footer-col"><h5>Platform</h5><a href="#innovations">Innovations</a><a href="#modules">Modules</a><a href="#research">Research</a></div>
+          <div class="footer-col"><h5>Innovations</h5><a href="#innovations">Teacher Persona</a><a href="#emotion">Emotion Fusion</a><a href="#sage">SAGE Engine</a><a href="#blockcode">Block Code IDE</a></div>
+          <div class="footer-col"><h5>Research</h5><a href="#research">Methodology</a><a href="#">Publications</a><a href="#">Results</a></div>
+        </div>
+        <div class="footer-bottom"><p>&copy; 2026 INTELLEA Platform. Research project by Asiri Jayawardena.</p></div>
+      </div>
+    </footer>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>
