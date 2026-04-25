@@ -4,14 +4,14 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
 <title>Domain | INTELLEA</title>
-<meta name="description" content="Literature survey, research gap, objectives, methodology, and technologies behind INTELLEA — the Intelligent Teaching and Learning Enhancement Architecture." />
+<meta name="description" content="Literature survey, research gap, objectives, methodology, and technologies behind INTELLEA: the Intelligent Teaching and Learning Enhancement Architecture." />
 <link rel="stylesheet" href="styles.css" />
 <link rel="stylesheet" href="pages.css" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
-  /* Tweakable theme variables — overridden at runtime */
+  /* Tweakable theme variables; overridden at runtime */
   :root.twk-applied {
     --font-sans: var(--twk-font, "IBM Plex Sans"), system-ui, sans-serif;
     --blue-600: var(--twk-accent, #2563eb);
@@ -124,10 +124,10 @@
     </div>
     <div class="lit-grid">
       <div class="lit-card reveal"><span class="lit-card-tag">Tutoring</span><h4>Intelligent Tutoring Systems</h4><div class="lit-card-author">VanLehn (2011); Kulik &amp; Fletcher (2016)</div><p>Meta-analyses establishing that one-on-one ITS approach human-tutor effectiveness, with effect sizes around d = 0.76 over conventional instruction.</p></div>
-      <div class="lit-card reveal"><span class="lit-card-tag">Knowledge Tracing</span><h4>Bayesian Knowledge Tracing</h4><div class="lit-card-author">Corbett &amp; Anderson (1995)</div><p>Probabilistic model estimating mastery via prior, learn-rate, guess and slip parameters — INTELLEA uses BKT to drive ZPD-aligned content selection.</p></div>
+      <div class="lit-card reveal"><span class="lit-card-tag">Knowledge Tracing</span><h4>Bayesian Knowledge Tracing</h4><div class="lit-card-author">Corbett &amp; Anderson (1995)</div><p>Probabilistic model estimating mastery via prior, learn-rate, guess and slip parameters; INTELLEA uses BKT to drive ZPD-aligned content selection.</p></div>
       <div class="lit-card reveal"><span class="lit-card-tag">Orchestration</span><h4>Multi-Agent Frameworks</h4><div class="lit-card-author">LangGraph · CrewAI · AutoGen</div><p>Comparative analysis of agentic frameworks. LangGraph's stateful DAG with self-loops powers our supervisor-validated tutoring and grading workflows.</p></div>
-      <div class="lit-card reveal"><span class="lit-card-tag">Retrieval</span><h4>RAG for Education</h4><div class="lit-card-author">Lewis et al. (2020); Cogniti</div><p>Retrieval-Augmented Generation grounds LLM outputs in course materials, mitigating hallucination — essential for trustworthy educational content.</p></div>
-      <div class="lit-card reveal"><span class="lit-card-tag">Emotion</span><h4>Multimodal Emotion Recognition</h4><div class="lit-card-author">D'Mello &amp; Graesser; Poria et al.</div><p>Affective computing in learning — face, voice, text fusion improves recognition robustness when single modalities suffer from noise or occlusion.</p></div>
+      <div class="lit-card reveal"><span class="lit-card-tag">Retrieval</span><h4>RAG for Education</h4><div class="lit-card-author">Lewis et al. (2020); Cogniti</div><p>Retrieval-Augmented Generation grounds LLM outputs in course materials, mitigating hallucination; essential for trustworthy educational content.</p></div>
+      <div class="lit-card reveal"><span class="lit-card-tag">Emotion</span><h4>Multimodal Emotion Recognition</h4><div class="lit-card-author">D'Mello &amp; Graesser; Poria et al.</div><p>Affective computing in learning: face, voice, and text fusion improves recognition robustness when single modalities suffer from noise or occlusion.</p></div>
       <div class="lit-card reveal"><span class="lit-card-tag">Assessment</span><h4>Automated Grading</h4><div class="lit-card-author">Burrows et al.; Zhang et al.</div><p>Existing systems handle objective items well but struggle with subjective and code grading. SAGE addresses this via specialist multi-agent evaluators.</p></div>
       <div class="lit-card reveal"><span class="lit-card-tag">Programming</span><h4>Block-based Environments</h4><div class="lit-card-author">Scratch · Snap! · Blockly · MakeCode</div><p>Visual programming reduces syntactic friction. INTELLEA extends this with deterministic AST-backed translation to textual languages.</p></div>
       <div class="lit-card reveal"><span class="lit-card-tag">Reference</span><h4>Reference Systems</h4><div class="lit-card-author">Cogniti · Squirrel AI · Knewton · vNMF · FACET</div><p>Each demonstrates strong capability on one or two dimensions; none integrate all six dimensions INTELLEA targets in a single architecture.</p></div>
@@ -181,8 +181,8 @@
       <h2 class="domain-section-title">Fragmentation reduces<br>pedagogical coherence</h2>
     </div>
     <div style="max-width: 820px; font-size: 17px; line-height: 1.85; color: var(--gray-600);" class="reveal">
-      <p style="margin-bottom: 20px;">Current AI-powered educational platforms exhibit fragmentation. Emotional intelligence, automated assessment, coding environments, and adaptive difficulty algorithms exist in isolation — each developed by different teams, with different assumptions, and no shared state.</p>
-      <p style="margin-bottom: 20px;">Teachers must juggle multiple disconnected tools that were not designed for state sharing. A frustrated student detected in one tool does not soften the assessment style in another. A misconception identified during tutoring does not surface during grading. The cognitive load on teachers — and the loss of pedagogical coherence — is significant.</p>
+      <p style="margin-bottom: 20px;">Current AI-powered educational platforms exhibit fragmentation. Emotional intelligence, automated assessment, coding environments, and adaptive difficulty algorithms exist in isolation; each developed by different teams, with different assumptions, and no shared state.</p>
+      <p style="margin-bottom: 20px;">Teachers must juggle multiple disconnected tools that were not designed for state sharing. A frustrated student detected in one tool does not soften the assessment style in another. A misconception identified during tutoring does not surface during grading. The cognitive load on teachers, and the loss of pedagogical coherence, is significant.</p>
       <p>INTELLEA's contribution is not any single component, but the integration: a single architecture where mastery state, emotional state, and pedagogical configuration flow between tutoring, assessment, coding, and content delivery.</p>
     </div>
   </div>
@@ -197,7 +197,7 @@
     </div>
     <div class="objective-grid">
       <div class="objective-card reveal"><div class="objective-num">01</div><h4>Multi-agent adaptive tutoring (ATLAS)</h4><p>Design an ATLAS subsystem with four configurable teaching styles, BKT-driven mastery tracking, ZPD-aligned content selection, and RAG-grounded delivery.</p></div>
-      <div class="objective-card reveal"><div class="objective-num">02</div><h4>Multi-agent automated grading (SAGE)</h4><p>Develop a SAGE engine with specialist evaluators for objective, subjective, mathematical, and coding submissions — with self-correction and confidence-gated review.</p></div>
+      <div class="objective-card reveal"><div class="objective-num">02</div><h4>Multi-agent automated grading (SAGE)</h4><p>Develop a SAGE engine with specialist evaluators for objective, subjective, mathematical, and coding submissions; with self-correction and confidence-gated review.</p></div>
       <div class="objective-card reveal"><div class="objective-num">03</div><h4>Hybrid Block–Code IDE</h4><p>Build a Hybrid IDE with a shared AST enabling deterministic bidirectional translation between visual blocks and textual programming languages.</p></div>
       <div class="objective-card reveal"><div class="objective-num">04</div><h4>Multimodal emotion recognition (VIBE)</h4><p>Integrate a VIBE subsystem fusing facial, speech, and textual signals via FFNN to enable emotion-aware adaptive teaching.</p></div>
       <div class="objective-card reveal" style="grid-column: 1 / -1;"><div class="objective-num">05</div><h4>Controlled pilot study evaluation</h4><p>Evaluate the integrated system through a controlled pilot measuring learning outcomes, knowledge retention, grading accuracy, and pedagogical fidelity. Pilot N = 62 secondary-school students; treatment-vs-control with 4-week retention follow-up.</p></div>
@@ -223,11 +223,11 @@
         </div>
         <div class="subsys-body">
           <ul>
-            <li><strong>LangGraph Virtual Teacher</strong> — multi-agent workflow with 9 specialist nodes</li>
-            <li><strong>Four teaching styles</strong> — Socratic, Direct Instruction, Collaborative, Scaffolded</li>
+            <li><strong>LangGraph Virtual Teacher:</strong> multi-agent workflow with 9 specialist nodes</li>
+            <li><strong>Four teaching styles:</strong> Socratic, Direct Instruction, Collaborative, Scaffolded</li>
             <li><strong>BKT mastery tracking</strong> with ZPD-based content selection</li>
-            <li><strong>ACE engine</strong> — 7 question types aligned to Bloom's Taxonomy with 3-validator pipeline</li>
-            <li><strong>RAG pipeline</strong> — Pinecone vector store, OpenAI embeddings</li>
+            <li><strong>ACE engine:</strong> 7 question types aligned to Bloom's Taxonomy with 3-validator pipeline</li>
+            <li><strong>RAG pipeline:</strong> Pinecone vector store, OpenAI embeddings</li>
             <li><strong>ElevenLabs voice synthesis</strong> with emotion-modulated parameters</li>
           </ul>
         </div>
@@ -242,12 +242,12 @@
         </div>
         <div class="subsys-body">
           <ul>
-            <li><strong>5 specialist evaluator agents</strong> — Objective, Subjective, Math, Coding, Validator</li>
+            <li><strong>5 specialist evaluator agents:</strong> Objective, Subjective, Math, Coding, Validator</li>
             <li><strong>LangGraph DAG orchestration</strong> with self-correction up to 3 iterations</li>
             <li><strong>Confidence-gated</strong> mandatory teacher review for borderline cases</li>
             <li><strong>TF-IDF plagiarism detection</strong> with cosine similarity threshold 0.85</li>
             <li><strong>Automated study recommendations</strong> for scores below 60%</li>
-            <li><strong>Gamified badge system</strong> — 4 tiers × 5 categories</li>
+            <li><strong>Gamified badge system:</strong> 4 tiers × 5 categories</li>
           </ul>
         </div>
       </div>
@@ -262,7 +262,7 @@
         <div class="subsys-body">
           <ul>
             <li><strong>Shared AST</strong> in normalized JSON schema</li>
-            <li><strong>Bidirectional translation</strong> — Python, Java, C++, React</li>
+            <li><strong>Bidirectional translation:</strong> Python, Java, C++, React</li>
             <li><strong>Sandboxed execution</strong> with WebSocket-based interactive I/O</li>
             <li><strong>PDF-to-Coding</strong> lesson generator pipeline</li>
             <li><strong>Adaptive difficulty</strong> service with rule-based challenge selection</li>
@@ -280,11 +280,11 @@
         </div>
         <div class="subsys-body">
           <ul>
-            <li><strong>Speech</strong> — MFCC features, deep model on RAVDESS, CREMA-D, TESS, SAVEE — <strong>73% acc</strong></li>
-            <li><strong>Video</strong> — Frame sequences, CLSTM on CREMA-D — <strong>71% acc</strong></li>
-            <li><strong>Text</strong> — GloVe embeddings, Bi-LSTM — <strong>91.5% acc</strong></li>
-            <li><strong>Fusion</strong> — FFNN combining predictions and confidence scores</li>
-            <li><strong>Adaptation</strong> — emotion drives ATLAS scaffolding intensity, hint strategy, voice parameters</li>
+            <li><strong>Speech:</strong> MFCC features, deep model on RAVDESS, CREMA-D, TESS, SAVEE; <strong>73% acc</strong></li>
+            <li><strong>Video:</strong> Frame sequences, CLSTM on CREMA-D; <strong>71% acc</strong></li>
+            <li><strong>Text:</strong> GloVe embeddings, Bi-LSTM; <strong>91.5% acc</strong></li>
+            <li><strong>Fusion:</strong> FFNN combining predictions and confidence scores</li>
+            <li><strong>Adaptation:</strong> emotion drives ATLAS scaffolding intensity, hint strategy, voice parameters</li>
           </ul>
         </div>
       </div>
