@@ -90,6 +90,41 @@
 .page-hero-breadcrumb a:hover { color: #fff; }
 .page-hero-breadcrumb svg { color: rgba(147,197,253,0.4); }
 
+/* ---------- Hero entrance animation ---------- */
+@keyframes hero-fade-up {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.page-hero-eyebrow {
+  opacity: 0;
+  animation: hero-fade-up 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
+}
+.page-hero-title {
+  opacity: 0;
+  animation: hero-fade-up 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.35s forwards;
+}
+.page-hero-subtitle {
+  opacity: 0;
+  animation: hero-fade-up 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.55s forwards;
+}
+.page-hero-breadcrumb {
+  opacity: 0;
+  animation: hero-fade-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.72s forwards;
+}
+
+/* ---------- Scroll reveal ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal.revealed {
+  opacity: 1;
+  transform: none;
+}
+
 /* ---------- Domain TOC ---------- */
 .domain-toc {
   position: sticky;
@@ -125,15 +160,29 @@
 
 /* ---------- Generic domain section ---------- */
 .domain-section {
-  padding: 100px 0;
+  padding: 112px 0;
   background: #fff;
 }
 .domain-section--muted { background: var(--gray-50); }
 .domain-section--dark {
   background: #0f1d3a;
   color: #e2e8f0;
+  position: relative;
+  overflow: hidden;
 }
-.domain-section-header { margin-bottom: 64px; max-width: 880px; }
+#methodologyCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+.domain-section--dark > .container {
+  position: relative;
+  z-index: 1;
+}
+.domain-section-header { margin-bottom: 72px; max-width: 880px; }
 .domain-section-num {
   display: inline-block;
   font-family: var(--font-mono);
@@ -343,33 +392,64 @@
 .subsys-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  gap: 28px;
 }
+/* staggered entrance for each card */
+.subsys-grid .subsys-card:nth-child(1) { transition-delay: 0ms; }
+.subsys-grid .subsys-card:nth-child(2) { transition-delay: 90ms; }
+.subsys-grid .subsys-card:nth-child(3) { transition-delay: 180ms; }
+.subsys-grid .subsys-card:nth-child(4) { transition-delay: 270ms; }
+
 .subsys-card {
+  position: relative;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 14px;
   overflow: hidden;
-  transition: all .25s ease;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.3s ease,
+              background 0.3s ease,
+              box-shadow 0.3s ease;
+}
+.subsys-card::before {
+  content: '';
+  display: block;
+  height: 2px;
+  background: rgba(96,165,250,0.25);
+  transition: background 0.3s ease;
 }
 .subsys-card:hover {
-  border-color: rgba(96,165,250,0.4);
-  background: rgba(255,255,255,0.06);
+  border-color: rgba(96,165,250,0.45);
+  background: rgba(255,255,255,0.07);
+  transform: translateY(-5px);
+  box-shadow: 0 16px 48px rgba(15,29,58,0.6), 0 0 0 1px rgba(96,165,250,0.2);
+}
+.subsys-card:hover::before {
+  background: rgba(96,165,250,0.75);
 }
 .subsys-head {
-  padding: 28px 28px 24px;
+  padding: 32px 32px 28px;
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 .subsys-icon {
-  width: 48px; height: 48px;
-  border-radius: 10px;
+  width: 52px; height: 52px;
+  border-radius: 12px;
   background: rgba(37,99,235,0.25);
   border: 1px solid rgba(96,165,250,0.3);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: #93c5fd;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
+  transition: background 0.3s ease, border-color 0.3s ease,
+              transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.3s ease;
+}
+.subsys-card:hover .subsys-icon {
+  background: rgba(37,99,235,0.42);
+  border-color: rgba(96,165,250,0.6);
+  transform: scale(1.1);
+  box-shadow: 0 0 22px rgba(96,165,250,0.28);
 }
 .subsys-tag {
   display: inline-block;
@@ -382,7 +462,7 @@
   margin-right: 12px;
 }
 .subsys-name {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: #fff;
@@ -390,11 +470,12 @@
 .subsys-sub {
   display: block;
   margin-top: 8px;
-  font-size: 13px;
-  color: rgba(226,232,240,0.6);
+  font-size: 13.5px;
+  color: rgba(226,232,240,0.62);
+  line-height: 1.5;
 }
 .subsys-body {
-  padding: 28px 28px 32px;
+  padding: 28px 32px 36px;
 }
 .subsys-body ul {
   list-style: none;
@@ -403,22 +484,22 @@
 }
 .subsys-body li {
   position: relative;
-  padding: 8px 0 8px 22px;
-  font-size: 14px;
-  line-height: 1.55;
-  color: rgba(226,232,240,0.78);
+  padding: 10px 0 10px 24px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: rgba(226,232,240,0.8);
   border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 .subsys-body li:last-child { border-bottom: none; }
 .subsys-body li:before {
   content: '';
   position: absolute;
-  left: 4px;
-  top: 17px;
-  width: 4px; height: 4px;
+  left: 6px;
+  top: 19px;
+  width: 5px; height: 5px;
   border-radius: 50%;
   background: #60a5fa;
-  box-shadow: 0 0 6px #60a5fa;
+  box-shadow: 0 0 8px rgba(96,165,250,0.7);
 }
 .subsys-body li strong {
   color: #fff;
@@ -1414,7 +1495,7 @@
    ============================================================= */
 @media (max-width: 900px) {
   .objective-grid,
-  .subsys-grid { grid-template-columns: 1fr; }
+  .subsys-grid { grid-template-columns: 1fr; gap: 20px; }
   .progress-strip-inner { grid-template-columns: 1fr; gap: 32px; }
   .contact-grid { grid-template-columns: 1fr; gap: 40px; }
   .contact-form { position: static; }
