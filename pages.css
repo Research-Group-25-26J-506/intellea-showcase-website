@@ -1264,7 +1264,7 @@
   box-shadow: 0 8px 20px rgba(15,29,58,0.06);
 }
 .supervisor-avatar {
-  width: 60px; height: 60px;
+  width: 80px; height: 80px;
   border-radius: 50%;
   background: linear-gradient(135deg, #1e3a8a, #2563eb);
   color: #fff;
