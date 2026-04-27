@@ -1,0 +1,1856 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Architecture | INTELLEA</title>
+<meta name="description" content="Live service topology of the INTELLEA platform: 30+ services across two cloud providers, six VPCs, and a constellation of external integrations." />
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="pages.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+  /* ──────────────────────────────────────────────
+     INTELLEA — Architecture / Service Map styles
+     (extends pages.css; isolated to this page)
+     ────────────────────────────────────────────── */
+
+  /* ── Stats strip ── */
+  .arch-stats {
+    background: var(--gray-50);
+    border-top: 1px solid var(--gray-200);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 32px 0;
+  }
+  .arch-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+  .arch-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .arch-stat-num {
+    font-family: var(--font-sans);
+    font-size: 36px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--gray-950);
+    line-height: 1;
+  }
+  .arch-stat-num span { color: var(--blue-600); }
+  .arch-stat-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+  }
+  @media (max-width: 768px) {
+    .arch-stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .arch-stat-num { font-size: 28px; }
+  }
+
+  /* ── Map section (dark cosmos backdrop) ── */
+  .map-section {
+    position: relative;
+    padding: 96px 0 64px;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% 0%, rgba(37,99,235,0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(96,165,250,0.10) 0%, transparent 70%),
+      #0a1628;
+    color: #e2e8f0;
+    overflow: hidden;
+  }
+  .map-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, rgba(147,197,253,0.4), transparent),
+      radial-gradient(1px 1px at 70% 60%, rgba(147,197,253,0.3), transparent),
+      radial-gradient(1px 1px at 40% 80%, rgba(147,197,253,0.5), transparent),
+      radial-gradient(1px 1px at 90% 20%, rgba(147,197,253,0.3), transparent),
+      radial-gradient(1px 1px at 10% 70%, rgba(147,197,253,0.4), transparent);
+    background-size: 600px 600px, 800px 800px, 700px 700px, 900px 900px, 750px 750px;
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  .map-section .container { position: relative; z-index: 1; }
+  .map-section .domain-section-num { color: #60a5fa; }
+  .map-section .domain-section-title { color: #fff; }
+  .map-section .domain-section-lead { color: rgba(226,232,240,0.72); }
+
+  /* ── Filter pills ── */
+  .map-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 32px 0 28px;
+  }
+  .map-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(226,232,240,0.7);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(147,197,253,0.18);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .map-filter:hover { background: rgba(96,165,250,0.10); color: #fff; border-color: rgba(96,165,250,0.5); }
+  .map-filter.active { background: var(--blue-600); color: #fff; border-color: var(--blue-600); }
+  .map-filter-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* ── Map canvas wrapper ── */
+  .map-wrap {
+    position: relative;
+    background: rgba(15, 29, 58, 0.4);
+    border: 1px solid rgba(96,165,250,0.18);
+    border-radius: var(--radius-xl);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.04),
+      0 30px 80px -30px rgba(0,0,0,0.5);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .map-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(96,165,250,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(96,165,250,0.06) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  /* ── Toolbar inside map-wrap ── */
+  .map-toolbar {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(96,165,250,0.12);
+    background: rgba(10, 22, 40, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .map-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .map-tools {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(147,197,253,0.18);
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+  .map-tool-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 30px;
+    min-width: 32px;
+    padding: 0 8px;
+    color: rgba(226,232,240,0.7);
+    background: transparent;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: background 0.16s, color 0.16s;
+  }
+  .map-tool-btn:hover { background: rgba(96,165,250,0.14); color: #fff; }
+  .map-tool-btn:active { background: rgba(96,165,250,0.22); }
+  .map-tool-btn svg { display: block; }
+  .map-zoom-label { font-family: var(--font-mono); font-size: 10px; line-height: 1; }
+  .map-tool-fs { padding: 0 10px; }
+  .map-tool-fs .map-tool-label { display: none; }
+  .map-tool-fs .fs-icon-collapse { display: none; }
+  .map-wrap.is-fullscreen .map-tool-fs .fs-icon-expand,
+  .map-wrap:fullscreen .map-tool-fs .fs-icon-expand { display: none; }
+  .map-wrap.is-fullscreen .map-tool-fs .fs-icon-collapse,
+  .map-wrap:fullscreen .map-tool-fs .fs-icon-collapse { display: block; }
+  @media (min-width: 900px) {
+    .map-tool-fs .map-tool-label { display: inline; }
+  }
+
+  /* Filter pill restyle for the dark toolbar */
+  .map-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(226,232,240,0.72);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(147,197,253,0.18);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.16s;
+    white-space: nowrap;
+  }
+  .map-filter:hover { background: rgba(96,165,250,0.12); color: #fff; border-color: rgba(96,165,250,0.5); }
+  .map-filter.active { background: var(--blue-600); color: #fff; border-color: var(--blue-600); }
+  .map-filter-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  /* ── Scroll + zoom container ── */
+  .map-scroll {
+    position: relative;
+    overflow: auto;
+    max-height: 1100px;
+    flex: 1 1 auto;
+  }
+  .map-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+  .map-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+  .map-scroll::-webkit-scrollbar-thumb { background: rgba(96,165,250,0.3); border-radius: 4px; }
+
+  .map-zoom-layer {
+    transform-origin: 0 0;
+    transition: transform 0.18s ease-out;
+    will-change: transform;
+    width: max-content;
+  }
+
+  .map-svg {
+    display: block;
+    width: 1500px;
+    min-width: 1280px;
+    height: auto;
+  }
+
+  /* ── Fullscreen state (covers Fullscreen API and JS-fallback class) ── */
+  .map-wrap.is-fullscreen,
+  .map-wrap:fullscreen,
+  .map-wrap:-webkit-full-screen {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% 0%, rgba(37,99,235,0.18) 0%, transparent 70%),
+      #0a1628;
+    z-index: 9999;
+  }
+  .map-wrap.is-fullscreen .map-scroll,
+  .map-wrap:fullscreen .map-scroll,
+  .map-wrap:-webkit-full-screen .map-scroll {
+    max-height: none;
+    height: 100%;
+  }
+  .map-wrap.is-fullscreen .map-toolbar,
+  .map-wrap:fullscreen .map-toolbar,
+  .map-wrap:-webkit-full-screen .map-toolbar {
+    padding: 12px 20px;
+  }
+  body.map-fullscreen-active { overflow: hidden; }
+
+  .map-hint {
+    position: absolute;
+    bottom: 16px;
+    right: 20px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: rgba(147,197,253,0.55);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* ── SVG element styling ── */
+  .zone-rect {
+    fill: rgba(96,165,250,0.025);
+    stroke: rgba(96,165,250,0.3);
+    stroke-width: 1.2;
+    stroke-dasharray: 5 4;
+    transition: stroke 0.3s, fill 0.3s;
+  }
+  .zone-rect.zone-aws { stroke: rgba(255,153,0,0.45); fill: rgba(255,153,0,0.025); }
+  .zone-rect.zone-railway { stroke: rgba(135,93,255,0.45); fill: rgba(135,93,255,0.025); }
+  .zone-rect.zone-external { stroke: rgba(148,163,184,0.4); fill: rgba(148,163,184,0.025); }
+  .zone-rect.zone-vpc { stroke-dasharray: 3 3; stroke: rgba(96,165,250,0.4); }
+  .zone-label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    fill: rgba(147,197,253,0.85);
+  }
+  .zone-label-aws { fill: #ffb84d; }
+  .zone-label-railway { fill: #b39bff; }
+  .zone-label-external { fill: rgba(203,213,225,0.85); }
+  .zone-sublabel {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    fill: rgba(147,197,253,0.55);
+    letter-spacing: 0.04em;
+  }
+
+  /* Connection paths */
+  .link {
+    fill: none;
+    stroke-width: 1.4;
+    opacity: 0.55;
+    transition: opacity 0.2s, stroke-width 0.2s;
+    pointer-events: none;
+  }
+  .link.dimmed { opacity: 0.08; }
+  .link.highlighted { opacity: 1; stroke-width: 2.4; }
+
+  .link-rest      { stroke: #60a5fa; stroke-dasharray: 4 3; }
+  .link-https     { stroke: #93c5fd; }
+  .link-kafka-prod { stroke: #f59e0b; }
+  .link-kafka-cons { stroke: #f59e0b; stroke-dasharray: 5 4; }
+  .link-db        { stroke: #10b981; }
+  .link-cache     { stroke: #a855f7; stroke-dasharray: 2 3; }
+  .link-llm       { stroke: #ec4899; stroke-dasharray: 4 3; }
+  .link-storage   { stroke: #fbbf24; }
+  .link-auth      { stroke: #14b8a6; stroke-dasharray: 1 3; }
+  .link-scrape    { stroke: #94a3b8; stroke-dasharray: 1 4; }
+  .link-email     { stroke: #ef4444; }
+  .link-cicd      { stroke: #c084fc; stroke-dasharray: 6 3; }
+
+  /* Animated flow */
+  .link-flow { animation: dashflow 2s linear infinite; }
+  @keyframes dashflow {
+    to { stroke-dashoffset: -20; }
+  }
+
+  /* Service orbs */
+  .orb { cursor: pointer; }
+  .orb-glow { transition: opacity 0.25s; }
+  .orb-core {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), filter 0.25s;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  .orb-pulse {
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: pulsering 2.6s ease-out infinite;
+  }
+  @keyframes pulsering {
+    0%   { transform: scale(0.85); opacity: 0.55; }
+    70%  { transform: scale(1.4);  opacity: 0;    }
+    100% { transform: scale(1.4);  opacity: 0;    }
+  }
+  .orb:hover .orb-core { transform: scale(1.12); filter: brightness(1.1); }
+  .orb:hover .orb-glow { opacity: 1 !important; }
+  .orb.dimmed { opacity: 0.25; }
+  .orb.dimmed .orb-pulse { animation: none; opacity: 0; }
+  .orb.highlighted .orb-core { transform: scale(1.15); }
+  .orb.selected .orb-core { stroke: #fff; stroke-width: 2; }
+
+  .orb-label {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 600;
+    fill: #f1f5f9;
+    text-anchor: middle;
+    pointer-events: none;
+  }
+  .orb-sublabel {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    fill: rgba(147,197,253,0.7);
+    text-anchor: middle;
+    letter-spacing: 0.03em;
+    pointer-events: none;
+  }
+  .orb-icon {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    fill: #fff;
+    text-anchor: middle;
+    pointer-events: none;
+  }
+
+  /* Tooltip */
+  .map-tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(15, 23, 42, 0.96);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(96,165,250,0.4);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: #f1f5f9;
+    box-shadow: 0 12px 40px -10px rgba(0,0,0,0.5);
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.15s, transform 0.15s;
+    z-index: 5;
+    max-width: 260px;
+  }
+  .map-tooltip.show { opacity: 1; transform: translateY(0); }
+  .map-tooltip-name {
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+    font-size: 13px;
+  }
+  .map-tooltip-meta {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: #93c5fd;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .map-tooltip-desc {
+    font-size: 11.5px;
+    color: rgba(226,232,240,0.78);
+    line-height: 1.5;
+  }
+
+  /* ── Legend section ── */
+  .legend-section {
+    background: var(--gray-50);
+    padding: 80px 0;
+  }
+  .legend-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+  @media (max-width: 900px) { .legend-grid { grid-template-columns: 1fr; } }
+
+  .legend-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+  }
+  .legend-card h4 {
+    font-size: 13px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--blue-600);
+    margin-bottom: 20px;
+  }
+  .legend-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--gray-200);
+  }
+  .legend-row:last-child { border-bottom: 0; }
+  .legend-swatch {
+    width: 36px;
+    height: 18px;
+    flex-shrink: 0;
+    border-radius: 2px;
+    position: relative;
+  }
+  .legend-swatch::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    height: 2px;
+    border-radius: 1px;
+  }
+  .legend-swatch.s-https::before { background: #93c5fd; }
+  .legend-swatch.s-rest::before { background: #60a5fa; background-image: linear-gradient(90deg, #60a5fa 60%, transparent 60%); background-size: 8px 2px; }
+  .legend-swatch.s-kafka::before { background: #f59e0b; }
+  .legend-swatch.s-db::before { background: #10b981; }
+  .legend-swatch.s-cache::before { background-image: radial-gradient(circle, #a855f7 50%, transparent 50%); background-size: 5px 2px; background-repeat: repeat-x; background-position: center; height: 2px; }
+  .legend-swatch.s-llm::before { background: #ec4899; background-image: linear-gradient(90deg, #ec4899 60%, transparent 60%); background-size: 8px 2px; }
+  .legend-swatch.s-storage::before { background: #fbbf24; }
+  .legend-swatch.s-auth::before { background-image: radial-gradient(circle, #14b8a6 50%, transparent 50%); background-size: 4px 2px; background-repeat: repeat-x; background-position: center; }
+  .legend-swatch.s-scrape::before { background-image: radial-gradient(circle, #94a3b8 50%, transparent 50%); background-size: 5px 2px; background-repeat: repeat-x; background-position: center; }
+  .legend-swatch.s-email::before { background: #ef4444; }
+  .legend-swatch.s-cicd::before { background: #c084fc; background-image: linear-gradient(90deg, #c084fc 65%, transparent 65%); background-size: 9px 2px; }
+
+  .legend-label {
+    font-size: 13px;
+    color: var(--gray-700);
+    font-weight: 500;
+    flex: 1;
+  }
+  .legend-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--gray-500);
+  }
+
+  .legend-orb {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--gray-200);
+  }
+  .legend-orb:last-child { border-bottom: 0; }
+  .legend-orb-circle {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 4px rgba(0,0,0,0.04), 0 0 12px currentColor;
+  }
+  .legend-orb-label { flex: 1; font-size: 13px; color: var(--gray-700); font-weight: 500; }
+  .legend-orb-meta { font-family: var(--font-mono); font-size: 11px; color: var(--gray-500); }
+
+  /* ── Service detail panel ── */
+  .detail-panel {
+    position: fixed;
+    top: 0;
+    right: -480px;
+    width: 460px;
+    max-width: 92vw;
+    height: 100vh;
+    background: #fff;
+    box-shadow: -20px 0 60px -10px rgba(0,0,0,0.2);
+    transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 1100;
+    overflow-y: auto;
+    border-left: 1px solid var(--gray-200);
+  }
+  .detail-panel.open { right: 0; }
+  .detail-panel-header {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--gray-200);
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 2;
+  }
+  .detail-panel-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--gray-200);
+    background: #fff;
+    border-radius: 999px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-600);
+    transition: all 0.15s;
+  }
+  .detail-panel-close:hover { background: var(--gray-100); color: var(--gray-900); }
+  .detail-panel-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--blue-600);
+    margin-bottom: 8px;
+  }
+  .detail-panel-title {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--gray-950);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    padding-right: 40px;
+  }
+  .detail-panel-body { padding: 24px 32px 40px; }
+  .detail-panel-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .detail-panel-meta-item {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+  }
+  .detail-panel-meta-label {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin-bottom: 4px;
+  }
+  .detail-panel-meta-value {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gray-900);
+    font-weight: 500;
+  }
+  .detail-panel-desc {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--gray-600);
+    margin-bottom: 28px;
+  }
+  .detail-panel-section h5 {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin: 0 0 12px;
+  }
+  .detail-panel-conn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px dashed var(--gray-200);
+    font-size: 13px;
+    color: var(--gray-700);
+  }
+  .detail-panel-conn:last-child { border-bottom: 0; }
+  .detail-panel-conn-arrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--blue-600);
+  }
+  .detail-panel-conn-label {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--gray-500);
+    background: var(--gray-100);
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  .detail-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 1099;
+  }
+  .detail-overlay.open { opacity: 1; pointer-events: auto; }
+
+  /* ── Tech stack snippet ── */
+  .tech-section { padding: 96px 0; background: #fff; }
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 48px;
+  }
+  @media (max-width: 900px) { .tech-grid { grid-template-columns: repeat(2, 1fr); } }
+  .tech-card {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    transition: all 0.25s;
+  }
+  .tech-card:hover {
+    background: #fff;
+    border-color: var(--blue-300);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px -10px rgba(37,99,235,0.15);
+  }
+  .tech-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .tech-card h5 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-950);
+    margin-bottom: 4px;
+  }
+  .tech-card p {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--gray-500);
+    margin: 0;
+  }
+  .tech-card-list {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--gray-600);
+    line-height: 1.55;
+  }
+
+  /* nav highlight */
+  .nav-link.is-active { color: var(--blue-700) !important; }
+</style>
+</head>
+<body>
+
+<nav class="navbar scrolled" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-mark"><svg width="22" height="22" viewBox="0 0 100 100" fill="none"><defs><linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#60a5fa"/><stop offset="100%" stop-color="#2563eb"/></linearGradient></defs><path d="M50 8L12 88H36L50 55L64 88H88L50 8Z" fill="url(#lg)"/></svg></div>
+      <span class="logo-wordmark">INTELLEA</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="domain.html" class="nav-link">Domain</a>
+      <a href="architecture.html" class="nav-link is-active">Architecture</a>
+      <a href="milestones.html" class="nav-link">Milestones</a>
+      <a href="documents.html" class="nav-link">Documents</a>
+      <a href="about.html" class="nav-link">About</a>
+    </div>
+    <div class="nav-actions">
+      <a href="contact.html" class="nav-cta">Contact <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+  <div class="mobile-menu" id="mobileMenu"><div class="mobile-menu-inner">
+    <a href="index.html">Home</a><a href="domain.html">Domain</a><a href="architecture.html">Architecture</a><a href="milestones.html">Milestones</a><a href="documents.html">Documents</a><a href="about.html">About</a><a href="contact.html" class="mobile-cta">Contact</a>
+  </div></div>
+</nav>
+
+<section class="page-hero">
+  <canvas></canvas>
+  <div class="page-hero-overlay"></div>
+  <div class="page-hero-content">
+    <div class="page-hero-eyebrow"><span class="page-hero-eyebrow-dot"></span>System Topology</div>
+    <h1 class="page-hero-title">A constellation <br>of <span class="page-hero-title-gradient">services</span></h1>
+    <p class="page-hero-subtitle">Thirty-plus services across two cloud providers, six VPCs, and a tightly-orchestrated mesh of REST, Kafka, and AI integrations. Hover any orb to trace its connections.</p>
+    <div class="page-hero-breadcrumb"><a href="index.html">HOME</a> <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg> ARCHITECTURE</div>
+  </div>
+</section>
+
+<!-- ─── STATS ─── -->
+<section class="arch-stats">
+  <div class="container">
+    <div class="arch-stats-grid">
+      <div class="arch-stat reveal">
+        <div class="arch-stat-num">30<span>+</span></div>
+        <div class="arch-stat-label">Services Deployed</div>
+      </div>
+      <div class="arch-stat reveal">
+        <div class="arch-stat-num">6</div>
+        <div class="arch-stat-label">VPC Boundaries</div>
+      </div>
+      <div class="arch-stat reveal">
+        <div class="arch-stat-num">2</div>
+        <div class="arch-stat-label">Cloud Providers</div>
+      </div>
+      <div class="arch-stat reveal">
+        <div class="arch-stat-num">8</div>
+        <div class="arch-stat-label">External Integrations</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── MAP ─── -->
+<section class="map-section">
+  <div class="container">
+    <div class="domain-section-header reveal" style="margin-bottom:48px;">
+      <div class="domain-section-num">SERVICE TOPOLOGY · LIVE VIEW</div>
+      <h2 class="domain-section-title">Every node, <br>every connection</h2>
+      <p class="domain-section-lead">Each glowing orb is a deployed service; lines trace the real data paths between them — REST calls, Kafka events, vector lookups, model inference, and Prometheus scrapes.</p>
+    </div>
+
+    <div class="map-wrap reveal" id="mapWrap">
+      <div class="map-toolbar">
+        <div class="map-filters">
+          <button class="map-filter active" data-filter="all"><span class="map-filter-dot" style="background:#60a5fa"></span>All Services</button>
+          <button class="map-filter" data-filter="java"><span class="map-filter-dot" style="background:#10b981"></span>Java · Spring Boot</button>
+          <button class="map-filter" data-filter="python"><span class="map-filter-dot" style="background:#3b82f6"></span>Python · FastAPI</button>
+          <button class="map-filter" data-filter="ml"><span class="map-filter-dot" style="background:#a855f7"></span>AI / ML</button>
+          <button class="map-filter" data-filter="frontend"><span class="map-filter-dot" style="background:#06b6d4"></span>Frontend</button>
+          <button class="map-filter" data-filter="data"><span class="map-filter-dot" style="background:#f59e0b"></span>Data &amp; Cache</button>
+          <button class="map-filter" data-filter="external"><span class="map-filter-dot" style="background:#94a3b8"></span>External APIs</button>
+          <button class="map-filter" data-filter="monitoring"><span class="map-filter-dot" style="background:#ec4899"></span>Monitoring</button>
+        </div>
+        <div class="map-tools">
+          <button class="map-tool-btn" id="mapZoomOut" title="Zoom out" aria-label="Zoom out">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          </button>
+          <button class="map-tool-btn" id="mapZoomReset" title="Reset zoom" aria-label="Reset zoom">
+            <span class="map-zoom-label" id="mapZoomLabel">100%</span>
+          </button>
+          <button class="map-tool-btn" id="mapZoomIn" title="Zoom in" aria-label="Zoom in">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          </button>
+          <button class="map-tool-btn map-tool-fs" id="mapFullscreen" title="Toggle fullscreen" aria-label="Toggle fullscreen">
+            <svg class="fs-icon-expand" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+            <svg class="fs-icon-collapse" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6"/><path d="M20 10h-6V4"/><path d="m14 10 7-7"/><path d="m3 21 7-7"/></svg>
+            <span class="map-tool-label">Fullscreen</span>
+          </button>
+        </div>
+      </div>
+      <div class="map-scroll" id="mapScroll">
+        <svg class="map-svg" viewBox="0 0 1500 1320" xmlns="http://www.w3.org/2000/svg" id="serviceMap">
+          <defs>
+            <!-- Orb gradients (radial) -->
+            <radialGradient id="orb-java" cx="35%" cy="35%">
+              <stop offset="0%"   stop-color="#6ee7b7"/>
+              <stop offset="55%"  stop-color="#10b981"/>
+              <stop offset="100%" stop-color="#065f46"/>
+            </radialGradient>
+            <radialGradient id="orb-python" cx="35%" cy="35%">
+              <stop offset="0%"   stop-color="#93c5fd"/>
+              <stop offset="55%"  stop-color="#3b82f6"/>
+              <stop offset="100%" stop-color="#1e40af"/>
+            </radialGradient>
+            <radialGradient id="orb-ml" cx="35%" cy="35%">
+              <stop offset="0%"   stop-color="#e9d5ff"/>
+              <stop offset="55%"  stop-color="#a855f7"/>
+              <stop offset="100%" stop-color="#6b21a8"/>
+            </radialGradient>
+            <radialGradient id="orb-frontend" cx="35%" cy="35%">
+              <stop offset="0%"   stop-color="#a5f3fc"/>
+              <stop offset="55%"  stop-color="#06b6d4"/>
+              <stop offset="100%" stop-color="#155e75"/>
+            </radialGradient>
+            <radialGradient id="orb-data" cx="35%" cy="35%">
+              <stop offset="0%"   stop-color="#fde68a"/>
+              <stop offset="55%"  stop-color="#f59e0b"/>
+              <stop offset="100%" stop-color="#92400e"/>
+            </radialGradient>
+            <radialGradient id="orb-external" cx="35%" cy="35%">
+              <stop offset="0%"   stop-color="#cbd5e1"/>
+              <stop offset="55%"  stop-color="#64748b"/>
+              <stop offset="100%" stop-color="#1e293b"/>
+            </radialGradient>
+            <radialGradient id="orb-monitoring" cx="35%" cy="35%">
+              <stop offset="0%"   stop-color="#fbcfe8"/>
+              <stop offset="55%"  stop-color="#ec4899"/>
+              <stop offset="100%" stop-color="#9d174d"/>
+            </radialGradient>
+            <radialGradient id="orb-edge" cx="35%" cy="35%">
+              <stop offset="0%"   stop-color="#fef3c7"/>
+              <stop offset="55%"  stop-color="#fbbf24"/>
+              <stop offset="100%" stop-color="#78350f"/>
+            </radialGradient>
+            <radialGradient id="orb-cicd" cx="35%" cy="35%">
+              <stop offset="0%"   stop-color="#e9d5ff"/>
+              <stop offset="55%"  stop-color="#c084fc"/>
+              <stop offset="100%" stop-color="#581c87"/>
+            </radialGradient>
+            <radialGradient id="orb-alb" cx="35%" cy="35%">
+              <stop offset="0%"   stop-color="#bae6fd"/>
+              <stop offset="55%"  stop-color="#0ea5e9"/>
+              <stop offset="100%" stop-color="#0c4a6e"/>
+            </radialGradient>
+
+            <!-- Outer halos (radial gradient with transparent edge) -->
+            <radialGradient id="halo-java"><stop offset="0%" stop-color="#10b981" stop-opacity="0.55"/><stop offset="100%" stop-color="#10b981" stop-opacity="0"/></radialGradient>
+            <radialGradient id="halo-python"><stop offset="0%" stop-color="#3b82f6" stop-opacity="0.55"/><stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/></radialGradient>
+            <radialGradient id="halo-ml"><stop offset="0%" stop-color="#a855f7" stop-opacity="0.6"/><stop offset="100%" stop-color="#a855f7" stop-opacity="0"/></radialGradient>
+            <radialGradient id="halo-frontend"><stop offset="0%" stop-color="#06b6d4" stop-opacity="0.55"/><stop offset="100%" stop-color="#06b6d4" stop-opacity="0"/></radialGradient>
+            <radialGradient id="halo-data"><stop offset="0%" stop-color="#f59e0b" stop-opacity="0.55"/><stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/></radialGradient>
+            <radialGradient id="halo-external"><stop offset="0%" stop-color="#94a3b8" stop-opacity="0.45"/><stop offset="100%" stop-color="#94a3b8" stop-opacity="0"/></radialGradient>
+            <radialGradient id="halo-monitoring"><stop offset="0%" stop-color="#ec4899" stop-opacity="0.55"/><stop offset="100%" stop-color="#ec4899" stop-opacity="0"/></radialGradient>
+            <radialGradient id="halo-edge"><stop offset="0%" stop-color="#fbbf24" stop-opacity="0.55"/><stop offset="100%" stop-color="#fbbf24" stop-opacity="0"/></radialGradient>
+            <radialGradient id="halo-cicd"><stop offset="0%" stop-color="#c084fc" stop-opacity="0.5"/><stop offset="100%" stop-color="#c084fc" stop-opacity="0"/></radialGradient>
+            <radialGradient id="halo-alb"><stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.55"/><stop offset="100%" stop-color="#0ea5e9" stop-opacity="0"/></radialGradient>
+
+            <!-- Inner highlight (top-left shine) -->
+            <radialGradient id="shine" cx="30%" cy="30%" r="40%">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.7)"/>
+              <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+            </radialGradient>
+
+            <!-- Arrow markers for connections -->
+            <marker id="arrow-rest" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#60a5fa"/></marker>
+            <marker id="arrow-https" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#93c5fd"/></marker>
+            <marker id="arrow-kafka" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#f59e0b"/></marker>
+            <marker id="arrow-db" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#10b981"/></marker>
+            <marker id="arrow-llm" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#ec4899"/></marker>
+            <marker id="arrow-cache" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#a855f7"/></marker>
+            <marker id="arrow-storage" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#fbbf24"/></marker>
+            <marker id="arrow-auth" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#14b8a6"/></marker>
+            <marker id="arrow-scrape" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#94a3b8"/></marker>
+            <marker id="arrow-email" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#ef4444"/></marker>
+            <marker id="arrow-cicd" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#c084fc"/></marker>
+          </defs>
+
+          <!-- ════════ CLOUD ZONES ════════ -->
+          <!-- AWS Cloud big container -->
+          <rect class="zone-rect zone-aws" x="40" y="160" width="870" height="720" rx="18"/>
+          <text class="zone-label zone-label-aws" x="62" y="192">AWS CLOUD · us-east-1</text>
+          <text class="zone-sublabel" x="62" y="208">Production · 10.0.0.0/16</text>
+
+          <!-- Railway Cloud container -->
+          <rect class="zone-rect zone-railway" x="950" y="160" width="510" height="720" rx="18"/>
+          <text class="zone-label zone-label-railway" x="972" y="192">RAILWAY CLOUD</text>
+          <text class="zone-sublabel" x="972" y="208">ML Inference Layer</text>
+
+          <!-- ════ AWS sub-VPCs ════ -->
+          <!-- intellea-core -->
+          <rect class="zone-rect zone-vpc" x="60" y="245" width="830" height="195" rx="12"/>
+          <text class="zone-label" x="80" y="270">VPC · intellea-core</text>
+          <text class="zone-sublabel" x="80" y="284">10.0.0.0/16 · ECS Fargate · Private Subnets (2 AZs)</text>
+
+          <!-- intellea-atlas-module -->
+          <rect class="zone-rect zone-vpc" x="60" y="465" width="400" height="180" rx="12"/>
+          <text class="zone-label" x="80" y="490">VPC · intellea-atlas-module</text>
+          <text class="zone-sublabel" x="80" y="504">10.1.0.0/16 · Fargate</text>
+
+          <!-- intellea-assessment-engine -->
+          <rect class="zone-rect zone-vpc" x="480" y="465" width="195" height="180" rx="12"/>
+          <text class="zone-label" x="498" y="490">VPC · assessment</text>
+          <text class="zone-sublabel" x="498" y="504">SAGE engine</text>
+
+          <!-- intellea-block-ide -->
+          <rect class="zone-rect zone-vpc" x="690" y="465" width="200" height="180" rx="12"/>
+          <text class="zone-label" x="708" y="490">VPC · block-ide</text>
+          <text class="zone-sublabel" x="708" y="504">Visual programming</text>
+
+          <!-- intellea-monitoring -->
+          <rect class="zone-rect zone-vpc" x="60" y="670" width="830" height="190" rx="12"/>
+          <text class="zone-label" x="80" y="695">VPC · intellea-monitoring</text>
+          <text class="zone-sublabel" x="80" y="709">10.2.0.0/16 · Observability stack</text>
+
+          <!-- ════ Railway sub-zones ════ -->
+          <!-- Emotion Detection -->
+          <rect class="zone-rect zone-vpc" x="970" y="245" width="475" height="380" rx="12" style="stroke:rgba(135,93,255,0.45);"/>
+          <text class="zone-label" x="990" y="270" style="fill:#b39bff;">EMOTION DETECTION MODULE</text>
+          <text class="zone-sublabel" x="990" y="284">Multimodal affect inference · VIBE</text>
+
+          <!-- Face Recognition -->
+          <rect class="zone-rect zone-vpc" x="970" y="650" width="475" height="200" rx="12" style="stroke:rgba(135,93,255,0.45);"/>
+          <text class="zone-label" x="990" y="675" style="fill:#b39bff;">FACE RECOGNITION SYSTEM</text>
+          <text class="zone-sublabel" x="990" y="689">Identity verification · attendance</text>
+
+          <!-- ════ External services band ════ -->
+          <rect class="zone-rect zone-external" x="40" y="920" width="1420" height="370" rx="18"/>
+          <text class="zone-label zone-label-external" x="62" y="952">EXTERNAL &amp; THIRD-PARTY SERVICES</text>
+          <text class="zone-sublabel" x="62" y="966">Managed data stores · LLM APIs · auth · email</text>
+
+          <!-- Internal divisions inside External band -->
+          <text class="zone-sublabel" x="80" y="998" style="font-weight:600; letter-spacing:0.1em; text-transform:uppercase; fill:rgba(203,213,225,0.7);">DATA STORES</text>
+          <line x1="80" y1="1006" x2="700" y2="1006" stroke="rgba(148,163,184,0.2)" stroke-width="1"/>
+
+          <text class="zone-sublabel" x="80" y="1148" style="font-weight:600; letter-spacing:0.1em; text-transform:uppercase; fill:rgba(203,213,225,0.7);">AI / LLM APIs &amp; INTEGRATIONS</text>
+          <line x1="80" y1="1156" x2="700" y2="1156" stroke="rgba(148,163,184,0.2)" stroke-width="1"/>
+
+          <text class="zone-sublabel" x="780" y="998" style="font-weight:600; letter-spacing:0.1em; text-transform:uppercase; fill:rgba(203,213,225,0.7);">MESSAGING &amp; AUTH</text>
+          <line x1="780" y1="1006" x2="1420" y2="1006" stroke="rgba(148,163,184,0.2)" stroke-width="1"/>
+
+          <text class="zone-sublabel" x="780" y="1148" style="font-weight:600; letter-spacing:0.1em; text-transform:uppercase; fill:rgba(203,213,225,0.7);">CI / CD PIPELINE</text>
+          <line x1="780" y1="1156" x2="1420" y2="1156" stroke="rgba(148,163,184,0.2)" stroke-width="1"/>
+
+          <!-- ════════ CONNECTIONS (drawn first, beneath orbs) ════════ -->
+          <g id="links">
+            <!-- Users → ALBs -->
+            <path class="link link-https" d="M 200 95 C 200 130, 130 130, 130 215" marker-end="url(#arrow-https)" data-from="users" data-to="alb-core"/>
+            <path class="link link-https" d="M 200 95 C 280 130, 330 150, 330 215" marker-end="url(#arrow-https)" data-from="users" data-to="alb-atlas"/>
+            <path class="link link-https" d="M 1200 95 C 1200 130, 1010 150, 1010 270" marker-end="url(#arrow-https)" data-from="users" data-to="text-emotion"/>
+            <path class="link link-https" d="M 1200 95 C 1200 130, 1200 130, 1200 720" marker-end="url(#arrow-https)" data-from="users" data-to="face-recognition"/>
+
+            <!-- ALB → backend services -->
+            <path class="link link-https" d="M 130 250 L 130 350" marker-end="url(#arrow-https)" data-from="alb-core" data-to="frontend"/>
+            <path class="link link-https" d="M 130 250 C 200 290, 280 320, 320 350" marker-end="url(#arrow-https)" data-from="alb-core" data-to="core-backend"/>
+            <path class="link link-https" d="M 130 250 C 300 290, 480 320, 540 350" marker-end="url(#arrow-https)" data-from="alb-core" data-to="notification"/>
+            <path class="link link-https" d="M 330 250 C 330 320, 200 480, 200 545" marker-end="url(#arrow-https)" data-from="alb-atlas" data-to="atlas-module"/>
+            <path class="link link-https" d="M 510 250 C 510 350, 580 470, 580 545" marker-end="url(#arrow-https)" data-from="alb-assessment" data-to="sage"/>
+            <path class="link link-https" d="M 690 250 C 690 350, 790 470, 790 545" marker-end="url(#arrow-https)" data-from="alb-block" data-to="block-ide"/>
+            <path class="link link-https" d="M 850 250 C 850 360, 460 660, 380 740" marker-end="url(#arrow-https)" data-from="alb-monitoring" data-to="prometheus"/>
+            <path class="link link-https" d="M 850 250 C 850 360, 700 700, 660 740" marker-end="url(#arrow-https)" data-from="alb-monitoring" data-to="grafana"/>
+
+            <!-- Core Backend connections -->
+            <path class="link link-rest link-flow" d="M 320 350 C 280 400, 230 480, 220 540" marker-end="url(#arrow-rest)" data-from="core-backend" data-to="atlas-module"/>
+            <path class="link link-rest link-flow" d="M 350 360 C 450 410, 540 470, 580 540" marker-end="url(#arrow-rest)" data-from="core-backend" data-to="sage"/>
+            <path class="link link-db link-flow" d="M 320 380 C 280 600, 240 850, 240 1040" marker-end="url(#arrow-db)" data-from="core-backend" data-to="mongodb"/>
+            <path class="link link-kafka-prod link-flow" d="M 360 380 C 600 600, 820 850, 880 1030" marker-end="url(#arrow-kafka)" data-from="core-backend" data-to="kafka"/>
+
+            <!-- Notification connections -->
+            <path class="link link-kafka-cons link-flow" d="M 880 1030 C 820 800, 620 580, 560 380" marker-end="url(#arrow-kafka)" data-from="kafka" data-to="notification"/>
+            <path class="link link-email link-flow" d="M 560 380 C 700 600, 1020 1010, 1130 1090" marker-end="url(#arrow-email)" data-from="notification" data-to="gmail"/>
+
+            <!-- ATLAS module → External -->
+            <path class="link link-llm link-flow" d="M 200 580 C 250 800, 350 990, 410 1180" marker-end="url(#arrow-llm)" data-from="atlas-module" data-to="openai"/>
+            <path class="link link-llm link-flow" d="M 240 580 C 350 800, 540 1000, 600 1180" marker-end="url(#arrow-llm)" data-from="atlas-module" data-to="elevenlabs"/>
+            <path class="link link-cache link-flow" d="M 220 580 C 240 750, 320 950, 410 1040" marker-end="url(#arrow-cache)" data-from="atlas-module" data-to="redis-ext"/>
+            <path class="link link-db link-flow" d="M 200 580 C 220 720, 540 950, 580 1040" marker-end="url(#arrow-db)" data-from="atlas-module" data-to="pinecone"/>
+            <path class="link link-storage link-flow" d="M 200 580 C 100 800, 100 1010, 100 1090" marker-end="url(#arrow-storage)" data-from="atlas-module" data-to="firebase-storage"/>
+
+            <!-- Frontend → Firebase Auth -->
+            <path class="link link-auth link-flow" d="M 130 380 C 100 600, 100 950, 100 1040" marker-end="url(#arrow-auth)" data-from="frontend" data-to="firebase-storage"/>
+
+            <!-- Prometheus scrape lines -->
+            <path class="link link-scrape link-flow" d="M 380 740 C 380 600, 350 460, 320 380" marker-end="url(#arrow-scrape)" data-from="prometheus" data-to="core-backend"/>
+            <path class="link link-scrape link-flow" d="M 380 740 C 380 620, 240 530, 200 580" marker-end="url(#arrow-scrape)" data-from="prometheus" data-to="atlas-module"/>
+            <path class="link link-scrape link-flow" d="M 380 740 C 460 660, 540 600, 580 580" marker-end="url(#arrow-scrape)" data-from="prometheus" data-to="sage"/>
+            <path class="link link-scrape link-flow" d="M 380 740 C 540 660, 700 600, 770 580" marker-end="url(#arrow-scrape)" data-from="prometheus" data-to="block-ide"/>
+            <path class="link link-scrape link-flow" d="M 380 740 C 460 600, 600 410, 720 360" marker-end="url(#arrow-scrape)" data-from="prometheus" data-to="nginx-exporter"/>
+
+            <!-- Grafana → Prometheus -->
+            <path class="link link-rest link-flow" d="M 660 740 L 410 740" marker-end="url(#arrow-rest)" data-from="grafana" data-to="prometheus"/>
+
+            <!-- Railway Cloud — Emotion Detection mesh (all → Redis-railway) -->
+            <path class="link link-cache link-flow" d="M 1010 295 C 1080 360, 1140 380, 1180 410" marker-end="url(#arrow-cache)" data-from="text-emotion" data-to="redis-railway"/>
+            <path class="link link-cache link-flow" d="M 1200 295 C 1200 350, 1200 380, 1200 410" marker-end="url(#arrow-cache)" data-from="speech-emotion" data-to="redis-railway"/>
+            <path class="link link-cache link-flow" d="M 1390 295 C 1320 360, 1240 390, 1220 410" marker-end="url(#arrow-cache)" data-from="video-emotion" data-to="redis-railway"/>
+            <path class="link link-cache link-flow" d="M 1010 540 C 1100 500, 1160 470, 1180 450" marker-end="url(#arrow-cache)" data-from="ffnn" data-to="redis-railway"/>
+            <path class="link link-cache link-flow" d="M 1390 540 C 1300 500, 1240 470, 1220 450" marker-end="url(#arrow-cache)" data-from="websocket" data-to="redis-railway"/>
+
+            <!-- Redis-railway → FFNN feedback -->
+            <path class="link link-cache link-flow" d="M 1180 440 C 1100 480, 1030 520, 1010 540" marker-end="url(#arrow-cache)" data-from="redis-railway" data-to="ffnn" opacity="0.3"/>
+
+            <!-- Core Backend → Emotion Detection (websocket) -->
+            <path class="link link-rest link-flow" d="M 380 360 C 800 360, 1280 480, 1390 540" marker-end="url(#arrow-rest)" data-from="core-backend" data-to="websocket"/>
+
+            <!-- CI/CD: GitHub → ECR → ECS -->
+            <path class="link link-cicd link-flow" d="M 880 90 L 1020 90" marker-end="url(#arrow-cicd)" data-from="github" data-to="cicd"/>
+            <path class="link link-cicd link-flow" d="M 1080 90 L 1240 90" marker-end="url(#arrow-cicd)" data-from="cicd" data-to="ecr"/>
+            <path class="link link-cicd link-flow" d="M 1300 110 C 1300 600, 850 1230, 1310 1230" marker-end="url(#arrow-cicd)" data-from="ecr" data-to="ecr-deploy"/>
+          </g>
+
+          <!-- ════════ ORBS (drawn after links so they sit above) ════════ -->
+          <!-- Each orb: <g class="orb" data-id=…><circle halo/><circle pulse/><circle core/><circle shine/><text icon/></g><text label/><text sublabel/> -->
+
+          <!-- ─── EDGE ORBS ─── -->
+          <!-- Users -->
+          <g class="orb" data-id="users" data-type="edge" transform="translate(200,70)">
+            <circle class="orb-glow" r="36" fill="url(#halo-edge)" opacity="0.7"/>
+            <circle class="orb-pulse" r="20" fill="none" stroke="#fbbf24" stroke-width="1.5" opacity="0.5"/>
+            <circle class="orb-core" r="20" fill="url(#orb-edge)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="20" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">USERS</text>
+          </g>
+          <text class="orb-label" x="200" y="115">Students · Teachers</text>
+          <text class="orb-sublabel" x="200" y="128">HTTPS · entry point</text>
+
+          <!-- CI/CD: GitHub -->
+          <g class="orb" data-id="github" data-type="cicd" transform="translate(850,90)">
+            <circle class="orb-glow" r="30" fill="url(#halo-cicd)" opacity="0.6"/>
+            <circle class="orb-core" r="17" fill="url(#orb-cicd)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="17" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">GH</text>
+          </g>
+          <text class="orb-label" x="850" y="125">GitHub</text>
+
+          <!-- CI/CD: Pipeline -->
+          <g class="orb" data-id="cicd" data-type="cicd" transform="translate(1050,90)">
+            <circle class="orb-glow" r="30" fill="url(#halo-cicd)" opacity="0.6"/>
+            <circle class="orb-pulse" r="17" fill="none" stroke="#c084fc" stroke-width="1.5" opacity="0.5"/>
+            <circle class="orb-core" r="17" fill="url(#orb-cicd)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="17" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">CI</text>
+          </g>
+          <text class="orb-label" x="1050" y="125">Pipeline</text>
+
+          <!-- CI/CD: ECR -->
+          <g class="orb" data-id="ecr" data-type="cicd" transform="translate(1270,90)">
+            <circle class="orb-glow" r="30" fill="url(#halo-cicd)" opacity="0.6"/>
+            <circle class="orb-core" r="17" fill="url(#orb-cicd)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="17" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">ECR</text>
+          </g>
+          <text class="orb-label" x="1270" y="125">Elastic Container Registry</text>
+
+          <!-- ─── AWS · ALBs ─── -->
+          <g class="orb" data-id="alb-core" data-type="frontend" transform="translate(130,225)">
+            <circle class="orb-glow" r="22" fill="url(#halo-alb)" opacity="0.6"/>
+            <circle class="orb-core" r="13" fill="url(#orb-alb)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="13" fill="url(#shine)" pointer-events="none"/>
+          </g>
+          <text class="orb-sublabel" x="130" y="252">ALB · core</text>
+
+          <g class="orb" data-id="alb-atlas" data-type="frontend" transform="translate(330,225)">
+            <circle class="orb-glow" r="22" fill="url(#halo-alb)" opacity="0.6"/>
+            <circle class="orb-core" r="13" fill="url(#orb-alb)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="13" fill="url(#shine)" pointer-events="none"/>
+          </g>
+          <text class="orb-sublabel" x="330" y="252">ALB · atlas</text>
+
+          <g class="orb" data-id="alb-assessment" data-type="frontend" transform="translate(510,225)">
+            <circle class="orb-glow" r="22" fill="url(#halo-alb)" opacity="0.6"/>
+            <circle class="orb-core" r="13" fill="url(#orb-alb)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="13" fill="url(#shine)" pointer-events="none"/>
+          </g>
+          <text class="orb-sublabel" x="510" y="252">ALB · sage</text>
+
+          <g class="orb" data-id="alb-block" data-type="frontend" transform="translate(690,225)">
+            <circle class="orb-glow" r="22" fill="url(#halo-alb)" opacity="0.6"/>
+            <circle class="orb-core" r="13" fill="url(#orb-alb)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="13" fill="url(#shine)" pointer-events="none"/>
+          </g>
+          <text class="orb-sublabel" x="690" y="252">ALB · block</text>
+
+          <g class="orb" data-id="alb-monitoring" data-type="frontend" transform="translate(850,225)">
+            <circle class="orb-glow" r="22" fill="url(#halo-alb)" opacity="0.6"/>
+            <circle class="orb-core" r="13" fill="url(#orb-alb)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="13" fill="url(#shine)" pointer-events="none"/>
+          </g>
+          <text class="orb-sublabel" x="850" y="252">ALB · obs</text>
+
+          <!-- ─── intellea-core services ─── -->
+          <g class="orb" data-id="frontend" data-type="frontend" transform="translate(130,355)">
+            <circle class="orb-glow" r="38" fill="url(#halo-frontend)" opacity="0.7"/>
+            <circle class="orb-pulse" r="22" fill="none" stroke="#06b6d4" stroke-width="1.5" opacity="0.5"/>
+            <circle class="orb-core" r="22" fill="url(#orb-frontend)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="22" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">UI</text>
+          </g>
+          <text class="orb-label" x="130" y="402">Frontend UI</text>
+          <text class="orb-sublabel" x="130" y="416">React + Nginx · :80</text>
+
+          <g class="orb" data-id="core-backend" data-type="java" transform="translate(330,355)">
+            <circle class="orb-glow" r="42" fill="url(#halo-java)" opacity="0.75"/>
+            <circle class="orb-pulse" r="24" fill="none" stroke="#10b981" stroke-width="1.5" opacity="0.55"/>
+            <circle class="orb-core" r="24" fill="url(#orb-java)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="24" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">JV</text>
+          </g>
+          <text class="orb-label" x="330" y="402">Core Backend</text>
+          <text class="orb-sublabel" x="330" y="416">Spring Boot · :8080</text>
+
+          <g class="orb" data-id="notification" data-type="java" transform="translate(540,355)">
+            <circle class="orb-glow" r="38" fill="url(#halo-java)" opacity="0.7"/>
+            <circle class="orb-pulse" r="22" fill="none" stroke="#10b981" stroke-width="1.5" opacity="0.5"/>
+            <circle class="orb-core" r="22" fill="url(#orb-java)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="22" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">JV</text>
+          </g>
+          <text class="orb-label" x="540" y="402">Notification Svc</text>
+          <text class="orb-sublabel" x="540" y="416">Spring Boot · :8082</text>
+
+          <g class="orb" data-id="nginx-exporter" data-type="monitoring" transform="translate(740,355)">
+            <circle class="orb-glow" r="32" fill="url(#halo-monitoring)" opacity="0.6"/>
+            <circle class="orb-core" r="18" fill="url(#orb-monitoring)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="18" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">NX</text>
+          </g>
+          <text class="orb-label" x="740" y="398">nginx-exporter</text>
+          <text class="orb-sublabel" x="740" y="412">Sidecar · :9113</text>
+
+          <!-- ─── ATLAS module ─── -->
+          <g class="orb" data-id="atlas-module" data-type="ml" transform="translate(220,560)">
+            <circle class="orb-glow" r="48" fill="url(#halo-ml)" opacity="0.8"/>
+            <circle class="orb-pulse" r="28" fill="none" stroke="#a855f7" stroke-width="1.5" opacity="0.6"/>
+            <circle class="orb-core" r="28" fill="url(#orb-ml)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="28" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="-3">ATLAS</text>
+            <text class="orb-icon" y="9" style="font-size:7.5px; opacity:0.85;">FastAPI</text>
+          </g>
+          <text class="orb-label" x="220" y="612">ATLAS Module</text>
+          <text class="orb-sublabel" x="220" y="626">ACE · Voice · Knowledge Base</text>
+
+          <!-- Sub-feature pills around ATLAS -->
+          <g transform="translate(360,520)" opacity="0.85">
+            <rect x="-32" y="-8" width="64" height="16" rx="8" fill="rgba(168,85,247,0.18)" stroke="rgba(168,85,247,0.45)" stroke-width="0.8"/>
+            <text x="0" y="3" class="orb-sublabel" style="fill:#d8b4fe; font-size:8.5px;">ACE Teacher</text>
+          </g>
+          <g transform="translate(370,560)" opacity="0.85">
+            <rect x="-32" y="-8" width="64" height="16" rx="8" fill="rgba(168,85,247,0.18)" stroke="rgba(168,85,247,0.45)" stroke-width="0.8"/>
+            <text x="0" y="3" class="orb-sublabel" style="fill:#d8b4fe; font-size:8.5px;">Q&amp;A Assist</text>
+          </g>
+          <g transform="translate(360,600)" opacity="0.85">
+            <rect x="-32" y="-8" width="64" height="16" rx="8" fill="rgba(168,85,247,0.18)" stroke="rgba(168,85,247,0.45)" stroke-width="0.8"/>
+            <text x="0" y="3" class="orb-sublabel" style="fill:#d8b4fe; font-size:8.5px;">Voice TTS</text>
+          </g>
+
+          <!-- ─── SAGE ─── -->
+          <g class="orb" data-id="sage" data-type="python" transform="translate(580,560)">
+            <circle class="orb-glow" r="42" fill="url(#halo-python)" opacity="0.75"/>
+            <circle class="orb-pulse" r="24" fill="none" stroke="#3b82f6" stroke-width="1.5" opacity="0.55"/>
+            <circle class="orb-core" r="24" fill="url(#orb-python)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="24" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">SAGE</text>
+          </g>
+          <text class="orb-label" x="580" y="608">Assessment Engine</text>
+          <text class="orb-sublabel" x="580" y="622">FastAPI · multi-agent</text>
+
+          <!-- ─── Block IDE ─── -->
+          <g class="orb" data-id="block-ide" data-type="frontend" transform="translate(790,560)">
+            <circle class="orb-glow" r="38" fill="url(#halo-frontend)" opacity="0.7"/>
+            <circle class="orb-pulse" r="22" fill="none" stroke="#06b6d4" stroke-width="1.5" opacity="0.5"/>
+            <circle class="orb-core" r="22" fill="url(#orb-frontend)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="22" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">IDE</text>
+          </g>
+          <text class="orb-label" x="790" y="608">Block-Based IDE</text>
+          <text class="orb-sublabel" x="790" y="622">Visual programming</text>
+
+          <!-- ─── Monitoring ─── -->
+          <g class="orb" data-id="prometheus" data-type="monitoring" transform="translate(380,755)">
+            <circle class="orb-glow" r="40" fill="url(#halo-monitoring)" opacity="0.7"/>
+            <circle class="orb-pulse" r="22" fill="none" stroke="#ec4899" stroke-width="1.5" opacity="0.5"/>
+            <circle class="orb-core" r="22" fill="url(#orb-monitoring)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="22" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">PR</text>
+          </g>
+          <text class="orb-label" x="380" y="800">Prometheus</text>
+          <text class="orb-sublabel" x="380" y="814">Metrics · :9090</text>
+
+          <g class="orb" data-id="grafana" data-type="monitoring" transform="translate(660,755)">
+            <circle class="orb-glow" r="40" fill="url(#halo-monitoring)" opacity="0.7"/>
+            <circle class="orb-pulse" r="22" fill="none" stroke="#ec4899" stroke-width="1.5" opacity="0.5"/>
+            <circle class="orb-core" r="22" fill="url(#orb-monitoring)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="22" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">GF</text>
+          </g>
+          <text class="orb-label" x="660" y="800">Grafana</text>
+          <text class="orb-sublabel" x="660" y="814">Dashboards · :3000</text>
+
+          <!-- ─── Railway · Emotion Detection ─── -->
+          <g class="orb" data-id="text-emotion" data-type="ml" transform="translate(1010,310)">
+            <circle class="orb-glow" r="36" fill="url(#halo-ml)" opacity="0.7"/>
+            <circle class="orb-pulse" r="20" fill="none" stroke="#a855f7" stroke-width="1.5" opacity="0.5"/>
+            <circle class="orb-core" r="20" fill="url(#orb-ml)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="20" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">TXT</text>
+          </g>
+          <text class="orb-label" x="1010" y="352">Text Emotion</text>
+          <text class="orb-sublabel" x="1010" y="366">FastAPI · NLP</text>
+
+          <g class="orb" data-id="speech-emotion" data-type="ml" transform="translate(1200,310)">
+            <circle class="orb-glow" r="36" fill="url(#halo-ml)" opacity="0.7"/>
+            <circle class="orb-pulse" r="20" fill="none" stroke="#a855f7" stroke-width="1.5" opacity="0.5"/>
+            <circle class="orb-core" r="20" fill="url(#orb-ml)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="20" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">SPC</text>
+          </g>
+          <text class="orb-label" x="1200" y="352">Speech Emotion</text>
+          <text class="orb-sublabel" x="1200" y="366">FastAPI · Audio</text>
+
+          <g class="orb" data-id="video-emotion" data-type="ml" transform="translate(1390,310)">
+            <circle class="orb-glow" r="36" fill="url(#halo-ml)" opacity="0.7"/>
+            <circle class="orb-pulse" r="20" fill="none" stroke="#a855f7" stroke-width="1.5" opacity="0.5"/>
+            <circle class="orb-core" r="20" fill="url(#orb-ml)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="20" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">VID</text>
+          </g>
+          <text class="orb-label" x="1390" y="352">Video Emotion</text>
+          <text class="orb-sublabel" x="1390" y="366">FastAPI · Vision</text>
+
+          <!-- Redis (railway) - center hub -->
+          <g class="orb" data-id="redis-railway" data-type="data" transform="translate(1200,430)">
+            <circle class="orb-glow" r="42" fill="url(#halo-data)" opacity="0.75"/>
+            <circle class="orb-pulse" r="24" fill="none" stroke="#f59e0b" stroke-width="1.5" opacity="0.55"/>
+            <circle class="orb-core" r="24" fill="url(#orb-data)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="24" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">RDS</text>
+          </g>
+          <text class="orb-label" x="1200" y="478">Redis (fusion)</text>
+          <text class="orb-sublabel" x="1200" y="492">Multimodal hub</text>
+
+          <g class="orb" data-id="ffnn" data-type="ml" transform="translate(1010,555)">
+            <circle class="orb-glow" r="36" fill="url(#halo-ml)" opacity="0.7"/>
+            <circle class="orb-pulse" r="20" fill="none" stroke="#a855f7" stroke-width="1.5" opacity="0.5"/>
+            <circle class="orb-core" r="20" fill="url(#orb-ml)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="20" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">FFN</text>
+          </g>
+          <text class="orb-label" x="1010" y="598">Feed-Forward NN</text>
+          <text class="orb-sublabel" x="1010" y="612">Fusion classifier</text>
+
+          <g class="orb" data-id="websocket" data-type="ml" transform="translate(1390,555)">
+            <circle class="orb-glow" r="36" fill="url(#halo-ml)" opacity="0.7"/>
+            <circle class="orb-pulse" r="20" fill="none" stroke="#a855f7" stroke-width="1.5" opacity="0.5"/>
+            <circle class="orb-core" r="20" fill="url(#orb-ml)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="20" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">WS</text>
+          </g>
+          <text class="orb-label" x="1390" y="598">Web Socket</text>
+          <text class="orb-sublabel" x="1390" y="612">FastAPI · streams</text>
+
+          <!-- Face Recognition -->
+          <g class="orb" data-id="face-recognition" data-type="ml" transform="translate(1200,735)">
+            <circle class="orb-glow" r="42" fill="url(#halo-ml)" opacity="0.75"/>
+            <circle class="orb-pulse" r="24" fill="none" stroke="#a855f7" stroke-width="1.5" opacity="0.55"/>
+            <circle class="orb-core" r="24" fill="url(#orb-ml)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="24" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">FACE</text>
+          </g>
+          <text class="orb-label" x="1200" y="785">Face Recognition</text>
+          <text class="orb-sublabel" x="1200" y="799">FastAPI · attendance</text>
+
+          <!-- ─── External services - Data stores row ─── -->
+          <g class="orb" data-id="mongodb" data-type="data" transform="translate(240,1055)">
+            <circle class="orb-glow" r="40" fill="url(#halo-data)" opacity="0.7"/>
+            <circle class="orb-core" r="22" fill="url(#orb-data)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="22" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">DB</text>
+          </g>
+          <text class="orb-label" x="240" y="1100">MongoDB</text>
+          <text class="orb-sublabel" x="240" y="1114">Document store · CRUD</text>
+
+          <g class="orb" data-id="redis-ext" data-type="data" transform="translate(420,1055)">
+            <circle class="orb-glow" r="40" fill="url(#halo-data)" opacity="0.7"/>
+            <circle class="orb-core" r="22" fill="url(#orb-data)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="22" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">RDS</text>
+          </g>
+          <text class="orb-label" x="420" y="1100">Redis (sessions)</text>
+          <text class="orb-sublabel" x="420" y="1114">Cache · session store</text>
+
+          <g class="orb" data-id="pinecone" data-type="data" transform="translate(580,1055)">
+            <circle class="orb-glow" r="40" fill="url(#halo-data)" opacity="0.7"/>
+            <circle class="orb-core" r="22" fill="url(#orb-data)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="22" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">PNC</text>
+          </g>
+          <text class="orb-label" x="580" y="1100">Pinecone</text>
+          <text class="orb-sublabel" x="580" y="1114">Vector DB · KB search</text>
+
+          <!-- Firebase -->
+          <g class="orb" data-id="firebase-storage" data-type="data" transform="translate(100,1055)">
+            <circle class="orb-glow" r="40" fill="url(#halo-data)" opacity="0.7"/>
+            <circle class="orb-core" r="22" fill="url(#orb-data)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="22" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">FB</text>
+          </g>
+          <text class="orb-label" x="100" y="1100">Firebase</text>
+          <text class="orb-sublabel" x="100" y="1114">Auth · Storage</text>
+
+          <!-- AI/LLM row -->
+          <g class="orb" data-id="openai" data-type="external" transform="translate(410,1205)">
+            <circle class="orb-glow" r="40" fill="url(#halo-external)" opacity="0.7"/>
+            <circle class="orb-pulse" r="22" fill="none" stroke="#94a3b8" stroke-width="1.5" opacity="0.4"/>
+            <circle class="orb-core" r="22" fill="url(#orb-external)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="22" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">GPT</text>
+          </g>
+          <text class="orb-label" x="410" y="1250">OpenAI</text>
+          <text class="orb-sublabel" x="410" y="1264">LLM + embeddings</text>
+
+          <g class="orb" data-id="elevenlabs" data-type="external" transform="translate(600,1205)">
+            <circle class="orb-glow" r="40" fill="url(#halo-external)" opacity="0.7"/>
+            <circle class="orb-core" r="22" fill="url(#orb-external)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="22" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">11L</text>
+          </g>
+          <text class="orb-label" x="600" y="1250">ElevenLabs</text>
+          <text class="orb-sublabel" x="600" y="1264">Text-to-speech</text>
+
+          <!-- Messaging -->
+          <g class="orb" data-id="kafka" data-type="data" transform="translate(900,1055)">
+            <circle class="orb-glow" r="42" fill="url(#halo-data)" opacity="0.75"/>
+            <circle class="orb-pulse" r="22" fill="none" stroke="#f59e0b" stroke-width="1.5" opacity="0.5"/>
+            <circle class="orb-core" r="22" fill="url(#orb-data)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="22" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">KF</text>
+          </g>
+          <text class="orb-label" x="900" y="1100">Apache Kafka</text>
+          <text class="orb-sublabel" x="900" y="1114">Event streaming</text>
+
+          <!-- Gmail -->
+          <g class="orb" data-id="gmail" data-type="external" transform="translate(1130,1055)">
+            <circle class="orb-glow" r="40" fill="url(#halo-external)" opacity="0.7"/>
+            <circle class="orb-core" r="22" fill="url(#orb-external)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="22" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">SMTP</text>
+          </g>
+          <text class="orb-label" x="1130" y="1100">Gmail SMTP</text>
+          <text class="orb-sublabel" x="1130" y="1114">Email delivery</text>
+
+          <!-- ECR Deploy (target) -->
+          <g class="orb" data-id="ecr-deploy" data-type="cicd" transform="translate(1310,1205)">
+            <circle class="orb-glow" r="38" fill="url(#halo-cicd)" opacity="0.65"/>
+            <circle class="orb-pulse" r="20" fill="none" stroke="#c084fc" stroke-width="1.5" opacity="0.5"/>
+            <circle class="orb-core" r="20" fill="url(#orb-cicd)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <circle r="20" fill="url(#shine)" pointer-events="none"/>
+            <text class="orb-icon" y="3">DEP</text>
+          </g>
+          <text class="orb-label" x="1310" y="1248">ECS Deploy</text>
+          <text class="orb-sublabel" x="1310" y="1262">Auto-scale · rolling</text>
+
+        </svg>
+      </div>
+      <div class="map-hint">SCROLL · HOVER · CLICK</div>
+      <div class="map-tooltip" id="mapTooltip"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── LEGEND ─── -->
+<section class="legend-section">
+  <div class="container">
+    <div class="domain-section-header reveal" style="margin-bottom:48px;">
+      <div class="domain-section-num">READING THE MAP</div>
+      <h2 class="domain-section-title" style="font-size:clamp(28px,3.4vw,40px);">Orbs and lines, decoded</h2>
+    </div>
+
+    <div class="legend-grid">
+      <div class="legend-card reveal">
+        <h4>Service Categories</h4>
+        <div class="legend-orb"><div class="legend-orb-circle" style="background:radial-gradient(circle at 30% 30%, #6ee7b7, #10b981 55%, #065f46); color:#10b981;"></div><div class="legend-orb-label">Java · Spring Boot</div><div class="legend-orb-meta">Core, Notification</div></div>
+        <div class="legend-orb"><div class="legend-orb-circle" style="background:radial-gradient(circle at 30% 30%, #93c5fd, #3b82f6 55%, #1e40af); color:#3b82f6;"></div><div class="legend-orb-label">Python · FastAPI</div><div class="legend-orb-meta">SAGE</div></div>
+        <div class="legend-orb"><div class="legend-orb-circle" style="background:radial-gradient(circle at 30% 30%, #e9d5ff, #a855f7 55%, #6b21a8); color:#a855f7;"></div><div class="legend-orb-label">AI / ML inference</div><div class="legend-orb-meta">ATLAS, Emotion, Face</div></div>
+        <div class="legend-orb"><div class="legend-orb-circle" style="background:radial-gradient(circle at 30% 30%, #a5f3fc, #06b6d4 55%, #155e75); color:#06b6d4;"></div><div class="legend-orb-label">Frontend / Web</div><div class="legend-orb-meta">React, IDE, ALBs</div></div>
+        <div class="legend-orb"><div class="legend-orb-circle" style="background:radial-gradient(circle at 30% 30%, #fde68a, #f59e0b 55%, #92400e); color:#f59e0b;"></div><div class="legend-orb-label">Data &amp; Cache</div><div class="legend-orb-meta">MongoDB, Redis, Pinecone, Kafka</div></div>
+        <div class="legend-orb"><div class="legend-orb-circle" style="background:radial-gradient(circle at 30% 30%, #cbd5e1, #64748b 55%, #1e293b); color:#64748b;"></div><div class="legend-orb-label">External APIs</div><div class="legend-orb-meta">OpenAI, ElevenLabs, Gmail</div></div>
+        <div class="legend-orb"><div class="legend-orb-circle" style="background:radial-gradient(circle at 30% 30%, #fbcfe8, #ec4899 55%, #9d174d); color:#ec4899;"></div><div class="legend-orb-label">Monitoring</div><div class="legend-orb-meta">Prometheus, Grafana</div></div>
+      </div>
+
+      <div class="legend-card reveal">
+        <h4>Connection Types</h4>
+        <div class="legend-row"><div class="legend-swatch s-https"></div><div class="legend-label">User-facing HTTPS</div><div class="legend-meta">solid</div></div>
+        <div class="legend-row"><div class="legend-swatch s-rest"></div><div class="legend-label">Internal REST API</div><div class="legend-meta">dashed · animated</div></div>
+        <div class="legend-row"><div class="legend-swatch s-kafka"></div><div class="legend-label">Kafka events</div><div class="legend-meta">solid · produce / consume</div></div>
+        <div class="legend-row"><div class="legend-swatch s-db"></div><div class="legend-label">Database CRUD</div><div class="legend-meta">solid</div></div>
+        <div class="legend-row"><div class="legend-swatch s-cache"></div><div class="legend-label">Redis cache / sessions</div><div class="legend-meta">dotted</div></div>
+        <div class="legend-row"><div class="legend-swatch s-llm"></div><div class="legend-label">LLM inference</div><div class="legend-meta">dashed · OpenAI / TTS</div></div>
+        <div class="legend-row"><div class="legend-swatch s-storage"></div><div class="legend-label">Cloud storage</div><div class="legend-meta">solid</div></div>
+        <div class="legend-row"><div class="legend-swatch s-auth"></div><div class="legend-label">Auth handshake</div><div class="legend-meta">dotted · Firebase</div></div>
+        <div class="legend-row"><div class="legend-swatch s-scrape"></div><div class="legend-label">Prometheus scrape</div><div class="legend-meta">dotted · /metrics</div></div>
+        <div class="legend-row"><div class="legend-swatch s-email"></div><div class="legend-label">SMTP delivery</div><div class="legend-meta">solid</div></div>
+        <div class="legend-row"><div class="legend-swatch s-cicd"></div><div class="legend-label">CI / CD deploy path</div><div class="legend-meta">dashed</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TECH SUMMARY ─── -->
+<section class="tech-section">
+  <div class="container">
+    <div class="domain-section-header reveal" style="margin-bottom:0;">
+      <div class="domain-section-num">UNDER THE HOOD</div>
+      <h2 class="domain-section-title" style="font-size:clamp(28px,3.4vw,40px);">Tech stack at a glance</h2>
+    </div>
+    <div class="tech-grid">
+      <div class="tech-card reveal">
+        <div class="tech-card-icon" style="background:#10b981;">JV</div>
+        <h5>Backend</h5>
+        <p>Java 17 · Spring Boot 3</p>
+        <div class="tech-card-list">Core API · Notification · Maven · JWT auth · Actuator</div>
+      </div>
+      <div class="tech-card reveal">
+        <div class="tech-card-icon" style="background:#3b82f6;">PY</div>
+        <h5>AI Services</h5>
+        <p>Python 3.11 · FastAPI</p>
+        <div class="tech-card-list">ATLAS · SAGE · Emotion models · LangChain · Pydantic</div>
+      </div>
+      <div class="tech-card reveal">
+        <div class="tech-card-icon" style="background:#06b6d4;">RX</div>
+        <h5>Frontend</h5>
+        <p>React 18 · Vite · Nginx</p>
+        <div class="tech-card-list">SPA · Block-IDE (Blockly) · TanStack Query · Tailwind</div>
+      </div>
+      <div class="tech-card reveal">
+        <div class="tech-card-icon" style="background:#f59e0b;">DB</div>
+        <h5>Data Layer</h5>
+        <p>MongoDB · Redis · Pinecone</p>
+        <div class="tech-card-list">Document store · Vector search · Session cache · Kafka topics</div>
+      </div>
+      <div class="tech-card reveal">
+        <div class="tech-card-icon" style="background:#a855f7;">AI</div>
+        <h5>AI APIs</h5>
+        <p>OpenAI · ElevenLabs</p>
+        <div class="tech-card-list">GPT-4 family · text embeddings · neural TTS · streaming</div>
+      </div>
+      <div class="tech-card reveal">
+        <div class="tech-card-icon" style="background:#ff9900;">AWS</div>
+        <h5>Infra</h5>
+        <p>AWS ECS · Fargate · ALB</p>
+        <div class="tech-card-list">us-east-1 · 5 VPCs · 2 AZs · auto-scaling · CloudWatch</div>
+      </div>
+      <div class="tech-card reveal">
+        <div class="tech-card-icon" style="background:#875dff;">RW</div>
+        <h5>ML Hosting</h5>
+        <p>Railway Cloud</p>
+        <div class="tech-card-list">Emotion detection · Face recognition · WebSockets</div>
+      </div>
+      <div class="tech-card reveal">
+        <div class="tech-card-icon" style="background:#ec4899;">PR</div>
+        <h5>Observability</h5>
+        <p>Prometheus · Grafana</p>
+        <div class="tech-card-list">/metrics endpoints · custom dashboards · alerting</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── DETAIL PANEL ─── -->
+<div class="detail-overlay" id="detailOverlay"></div>
+<aside class="detail-panel" id="detailPanel" aria-hidden="true">
+  <div class="detail-panel-header">
+    <button class="detail-panel-close" id="detailClose" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="detail-panel-eyebrow" id="detailEyebrow">SERVICE</div>
+    <div class="detail-panel-title" id="detailTitle">Service Name</div>
+  </div>
+  <div class="detail-panel-body">
+    <div class="detail-panel-meta" id="detailMeta"></div>
+    <p class="detail-panel-desc" id="detailDesc"></p>
+
+    <div class="detail-panel-section" id="detailOutSection" style="margin-bottom:24px;">
+      <h5>Outgoing connections</h5>
+      <div id="detailOutgoing"></div>
+    </div>
+    <div class="detail-panel-section" id="detailInSection">
+      <h5>Incoming connections</h5>
+      <div id="detailIncoming"></div>
+    </div>
+  </div>
+</aside>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><div class="footer-logo"><svg width="20" height="20" viewBox="0 0 100 100" fill="none"><path d="M50 8L12 88H36L50 55L64 88H88L50 8Z" fill="#60a5fa"/></svg><span>INTELLEA</span></div><p>Intelligent Teaching and Learning<br>Enhancement Architecture</p></div>
+      <div class="footer-col"><h5>Project</h5><a href="domain.html">Domain</a><a href="architecture.html">Architecture</a><a href="milestones.html">Milestones</a><a href="documents.html">Documents</a></div>
+      <div class="footer-col"><h5>Resources</h5><a href="documents.html">Research Paper</a></div>
+      <div class="footer-col"><h5>Connect</h5><a href="about.html">Team</a><a href="contact.html">Contact</a></div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 INTELLEA Platform · SLIIT Research Project</p></div>
+  </div>
+</footer>
+
+<script src="pages.js" defer></script>
+<script>
+(function () {
+  'use strict';
+
+  // ───── Service registry (drives tooltip + detail panel) ─────
+  const SERVICES = {
+    'users':            { name: 'End Users',                meta: 'EDGE',   tech: 'HTTPS', vpc: 'Public Internet',     port: '443', type: 'edge',
+                           desc: 'Students, teachers, and administrators interacting with INTELLEA via the web frontend or directly via the Railway-hosted Face Recognition kiosk.' },
+    'github':           { name: 'GitHub',                   meta: 'CI/CD',  tech: 'Git',  vpc: 'External',            port: '—',   type: 'cicd',
+                           desc: 'Source-of-truth repository. Push events trigger the CI pipeline that builds Docker images and updates ECS task definitions.' },
+    'cicd':             { name: 'CI Pipeline',              meta: 'CI/CD',  tech: 'GitHub Actions', vpc: 'GitHub-hosted', port: '—', type: 'cicd',
+                           desc: 'Builds, tests and pushes container images, then patches the ECS task definition with the new image tag and triggers a rolling deploy.' },
+    'ecr':              { name: 'Elastic Container Registry', meta: 'AWS', tech: 'OCI',  vpc: 'AWS · us-east-1',       port: '443', type: 'cicd',
+                           desc: 'Private OCI registry storing every immutable image tag the platform has ever shipped. Source for all Fargate task pulls.' },
+    'ecr-deploy':       { name: 'ECS Rolling Deploy',       meta: 'AWS',    tech: 'Fargate', vpc: 'All AWS VPCs',      port: '—',   type: 'cicd',
+                           desc: 'Auto-scaling rolling deployment that pulls the new image from ECR and replaces task instances with zero downtime.' },
+    'alb-core':         { name: 'ALB · intellea-alb',       meta: 'INGRESS', tech: 'AWS ALB', vpc: 'intellea-core',    port: '443', type: 'frontend',
+                           desc: 'Routes /api/* to the Spring Boot core, /notifications/* to the notification service, and / to the React frontend behind Nginx.' },
+    'alb-atlas':        { name: 'ALB · atlas-module-alb',   meta: 'INGRESS', tech: 'AWS ALB', vpc: 'atlas-module',     port: '443', type: 'frontend',
+                           desc: 'Public entry point for ATLAS. Front-loads authentication and routes inference requests to the FastAPI tasks.' },
+    'alb-assessment':   { name: 'ALB · assessment-alb',     meta: 'INGRESS', tech: 'AWS ALB', vpc: 'assessment-engine', port: '443', type: 'frontend',
+                           desc: 'Routes incoming SAGE requests to the assessment engine FastAPI service.' },
+    'alb-block':        { name: 'ALB · block-ide-alb',      meta: 'INGRESS', tech: 'AWS ALB', vpc: 'block-ide',         port: '443', type: 'frontend',
+                           desc: 'Public entry point for the Block-Based IDE; serves the IDE bundle and proxies execute calls.' },
+    'alb-monitoring':   { name: 'ALB · monitoring-alb',     meta: 'INGRESS', tech: 'AWS ALB', vpc: 'monitoring',        port: '443', type: 'frontend',
+                           desc: 'Auth-gated entry to the Prometheus and Grafana UIs. Internal-only by default.' },
+    'frontend':         { name: 'Frontend UI',              meta: 'WEB',    tech: 'React + Nginx', vpc: 'intellea-core', port: '80', type: 'frontend',
+                           desc: 'Single-page React app (Vite) served behind Nginx. Talks to the core backend over /api/*, calls Firebase for auth, and embeds ATLAS/IDE iframes.' },
+    'core-backend':     { name: 'Core Backend',             meta: 'API',    tech: 'Spring Boot · Java 17', vpc: 'intellea-core', port: '8080', type: 'java',
+                           desc: 'Heart of the platform: user management, course graph, mastery state, BKT updates, and orchestration calls into ATLAS, SAGE, and the emotion module.' },
+    'notification':     { name: 'Notification Service',     meta: 'WORKER', tech: 'Spring Boot · Java 17', vpc: 'intellea-core', port: '8082', type: 'java',
+                           desc: 'Consumes notification events from Kafka and dispatches templated emails via Gmail SMTP. Stateless and horizontally scaled.' },
+    'nginx-exporter':   { name: 'nginx-prometheus-exporter', meta: 'SIDECAR', tech: 'Go binary', vpc: 'intellea-core', port: '9113', type: 'monitoring',
+                           desc: 'Sidecar that scrapes Nginx stub_status and exposes it as Prometheus metrics on /metrics. Enables RPS / connection / latency dashboards.' },
+    'atlas-module':     { name: 'ATLAS Module',             meta: 'AI',     tech: 'FastAPI · Python 3.11', vpc: 'atlas-module', port: '8000', type: 'ml',
+                           desc: 'Adaptive learning engine: ACE virtual teacher, Q&A assistant, voice tutoring, and the knowledge-base retrieval layer. Glues OpenAI, ElevenLabs, Pinecone, and Redis together.' },
+    'sage':             { name: 'SAGE Assessment Engine',   meta: 'AI',     tech: 'FastAPI · Python 3.11', vpc: 'assessment-engine', port: '8000', type: 'python',
+                           desc: 'Multi-agent assessment engine: KB Confluence agent, orchestrator, CQL mapper, answer generator. Returns scored evaluations and feedback.' },
+    'block-ide':        { name: 'Block-Based IDE',          meta: 'WEB',    tech: 'React · Blockly',       vpc: 'block-ide',  port: '80', type: 'frontend',
+                           desc: 'Visual programming surface for novice learners. Bidirectional Block ↔ Python translation, sandboxed execution, and progress reporting back to the core.' },
+    'prometheus':       { name: 'Prometheus',               meta: 'METRICS', tech: 'Prometheus 2.x',       vpc: 'monitoring', port: '9090', type: 'monitoring',
+                           desc: 'Pulls /metrics endpoints across all VPCs every 15s, evaluates alerting rules, and stores time-series for Grafana to query.' },
+    'grafana':          { name: 'Grafana',                  meta: 'DASHBOARDS', tech: 'Grafana 10',         vpc: 'monitoring', port: '3000', type: 'monitoring',
+                           desc: 'Single pane of glass for the platform. Pulls from Prometheus and CloudWatch; hosts dashboards for each service and the consumer-performance suite.' },
+    'text-emotion':     { name: 'Text Emotion Detection',   meta: 'ML',     tech: 'FastAPI · transformers', vpc: 'Railway',   port: '—', type: 'ml',
+                           desc: 'NLP classifier producing per-utterance emotion vectors; results pushed into the Redis fusion bus for cross-modal aggregation.' },
+    'speech-emotion':   { name: 'Speech Emotion Detection', meta: 'ML',     tech: 'FastAPI · librosa',     vpc: 'Railway',    port: '—', type: 'ml',
+                           desc: 'Acoustic-feature emotion model. Reads streamed audio frames, emits prosody-derived affect labels into the Redis hub.' },
+    'video-emotion':    { name: 'Video Emotion Detection',  meta: 'ML',     tech: 'FastAPI · OpenCV',      vpc: 'Railway',    port: '—', type: 'ml',
+                           desc: 'Facial-action-unit and expression model. Consumes webcam frames, writes per-frame emotion vectors into the Redis fusion bus.' },
+    'redis-railway':    { name: 'Redis (multimodal hub)',   meta: 'CACHE',  tech: 'Redis 7',               vpc: 'Railway',    port: '6379', type: 'data',
+                           desc: 'Central pub/sub and short-term store for the three modality models and the fusion network. Acts as the synchronisation point of the VIBE pipeline.' },
+    'ffnn':             { name: 'Feed-Forward NN (fusion)', meta: 'ML',     tech: 'FastAPI · PyTorch',     vpc: 'Railway',    port: '—', type: 'ml',
+                           desc: 'Late-fusion classifier that combines the three modality vectors into a single emotion estimate consumed by the core backend for adaptation.' },
+    'websocket':        { name: 'Web Socket Gateway',       meta: 'STREAM', tech: 'FastAPI · websockets',  vpc: 'Railway',    port: '—', type: 'ml',
+                           desc: 'Bidirectional streaming endpoint between the browser and the emotion module. Streams frames in, fused affect estimates out.' },
+    'face-recognition': { name: 'Face Recognition',         meta: 'ML',     tech: 'FastAPI · face_recognition', vpc: 'Railway', port: '—', type: 'ml',
+                           desc: 'Identity verification and attendance check-in. Embedding match against the enrolled cohort; logs into MongoDB via the core backend.' },
+    'mongodb':          { name: 'MongoDB',                  meta: 'STORE',  tech: 'MongoDB Atlas',         vpc: 'Atlas-managed', port: '27017', type: 'data',
+                           desc: 'Primary document store: users, courses, lessons, progress, mastery state. CRUD by the Spring Boot core backend.' },
+    'redis-ext':        { name: 'Redis (sessions)',         meta: 'CACHE',  tech: 'Redis 7',               vpc: 'External',   port: '6379', type: 'data',
+                           desc: 'Session and ATLAS conversation cache. Short-lived state for the AI tutor and short-term knowledge-base lookups.' },
+    'pinecone':         { name: 'Pinecone',                 meta: 'VECTOR', tech: 'Pinecone',              vpc: 'External',   port: '443', type: 'data',
+                           desc: 'Managed vector database. ATLAS embeds knowledge-base chunks and queries them with semantic similarity for retrieval-augmented answers.' },
+    'firebase-storage': { name: 'Firebase',                 meta: 'STORAGE',tech: 'Firebase',              vpc: 'External',   port: '443', type: 'data',
+                           desc: 'Authentication for the frontend (federated logins, JWT issuance) and object storage for student-uploaded artefacts and avatars.' },
+    'kafka':            { name: 'Apache Kafka',             meta: 'EVENTS', tech: 'Confluent Kafka',       vpc: 'External',   port: '9092', type: 'data',
+                           desc: 'Event backbone. Core publishes notification, mastery and audit events; the notification service is the primary consumer.' },
+    'openai':           { name: 'OpenAI',                   meta: 'LLM',    tech: 'OpenAI API',            vpc: 'External',   port: '443', type: 'external',
+                           desc: 'Provides chat completions and embedding vectors used by ATLAS for the virtual teacher and knowledge-base retrieval pipeline.' },
+    'elevenlabs':       { name: 'ElevenLabs',               meta: 'TTS',    tech: 'ElevenLabs API',        vpc: 'External',   port: '443', type: 'external',
+                           desc: 'Neural text-to-speech for the ATLAS Voice tutor. Streams audio chunks back to the browser via the core backend.' },
+    'gmail':            { name: 'Gmail SMTP',               meta: 'EMAIL',  tech: 'SMTP relay',            vpc: 'External',   port: '587', type: 'external',
+                           desc: 'Outbound transactional email from the notification service. Welcome, password reset, deadline reminders, and grade notifications.' },
+  };
+
+  // Connection registry — derived directly from the SVG paths (data-from / data-to)
+  const linkEls = Array.from(document.querySelectorAll('.link'));
+  const connections = linkEls.map(el => ({
+    el,
+    from: el.getAttribute('data-from'),
+    to:   el.getAttribute('data-to'),
+    kind: (el.classList[1] || '').replace('link-', '')
+  })).filter(c => c.from && c.to);
+
+  const KIND_LABEL = {
+    'rest':       'REST',
+    'https':      'HTTPS',
+    'kafka-prod': 'Kafka · produce',
+    'kafka-cons': 'Kafka · consume',
+    'db':         'DB · CRUD',
+    'cache':      'Cache',
+    'llm':        'LLM',
+    'storage':    'Storage',
+    'auth':       'Auth',
+    'scrape':     'Scrape',
+    'email':      'Email',
+    'cicd':       'Deploy',
+  };
+
+  // ───── Tooltip ─────
+  const tooltip = document.getElementById('mapTooltip');
+  const mapWrap = document.querySelector('.map-wrap');
+
+  function showTooltip(e, id) {
+    const svc = SERVICES[id];
+    if (!svc) return;
+    tooltip.innerHTML = `
+      <div class="map-tooltip-name">${svc.name}</div>
+      <div class="map-tooltip-meta">${svc.meta} · ${svc.tech}</div>
+      <div class="map-tooltip-desc">${svc.desc}</div>
+    `;
+    const rect = mapWrap.getBoundingClientRect();
+    let x = e.clientX - rect.left + 14;
+    let y = e.clientY - rect.top + 14;
+    // keep inside
+    if (x + 280 > rect.width) x = e.clientX - rect.left - 280;
+    if (y + 160 > rect.height) y = e.clientY - rect.top - 160;
+    tooltip.style.left = x + 'px';
+    tooltip.style.top = y + 'px';
+    tooltip.classList.add('show');
+  }
+  function hideTooltip() { tooltip.classList.remove('show'); }
+
+  // ───── Highlight on hover ─────
+  const orbs = Array.from(document.querySelectorAll('.orb'));
+
+  function highlight(id) {
+    const related = new Set([id]);
+    connections.forEach(c => {
+      if (c.from === id || c.to === id) {
+        related.add(c.from); related.add(c.to);
+      }
+    });
+    orbs.forEach(o => {
+      const oid = o.getAttribute('data-id');
+      if (related.has(oid)) o.classList.remove('dimmed');
+      else o.classList.add('dimmed');
+      o.classList.toggle('highlighted', oid === id);
+    });
+    connections.forEach(c => {
+      if (c.from === id || c.to === id) {
+        c.el.classList.add('highlighted');
+        c.el.classList.remove('dimmed');
+      } else {
+        c.el.classList.add('dimmed');
+        c.el.classList.remove('highlighted');
+      }
+    });
+  }
+  function clearHighlight() {
+    orbs.forEach(o => { o.classList.remove('dimmed', 'highlighted'); });
+    connections.forEach(c => c.el.classList.remove('dimmed', 'highlighted'));
+  }
+
+  orbs.forEach(orb => {
+    const id = orb.getAttribute('data-id');
+    orb.addEventListener('mouseenter', (e) => { highlight(id); showTooltip(e, id); });
+    orb.addEventListener('mousemove',  (e) => { showTooltip(e, id); });
+    orb.addEventListener('mouseleave', () => { clearHighlight(); hideTooltip(); });
+    orb.addEventListener('click', () => openDetail(id));
+  });
+
+  // ───── Filter pills ─────
+  const filterBtns = document.querySelectorAll('.map-filter');
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const f = btn.getAttribute('data-filter');
+      orbs.forEach(o => {
+        const t = o.getAttribute('data-type');
+        if (f === 'all' || t === f) o.classList.remove('dimmed');
+        else o.classList.add('dimmed');
+      });
+      // dim links that don't touch the selected category
+      if (f === 'all') {
+        connections.forEach(c => c.el.classList.remove('dimmed'));
+      } else {
+        const visibleIds = new Set(orbs.filter(o => !o.classList.contains('dimmed')).map(o => o.getAttribute('data-id')));
+        connections.forEach(c => {
+          if (visibleIds.has(c.from) && visibleIds.has(c.to)) c.el.classList.remove('dimmed');
+          else c.el.classList.add('dimmed');
+        });
+      }
+    });
+  });
+
+  // ───── Detail panel ─────
+  const panel       = document.getElementById('detailPanel');
+  const panelClose  = document.getElementById('detailClose');
+  const overlay     = document.getElementById('detailOverlay');
+  const titleEl     = document.getElementById('detailTitle');
+  const eyebrowEl   = document.getElementById('detailEyebrow');
+  const metaEl      = document.getElementById('detailMeta');
+  const descEl      = document.getElementById('detailDesc');
+  const outEl       = document.getElementById('detailOutgoing');
+  const inEl        = document.getElementById('detailIncoming');
+  const outSection  = document.getElementById('detailOutSection');
+  const inSection   = document.getElementById('detailInSection');
+
+  function openDetail(id) {
+    const svc = SERVICES[id];
+    if (!svc) return;
+
+    titleEl.textContent = svc.name;
+    eyebrowEl.textContent = `${svc.meta} · ${svc.vpc}`;
+    metaEl.innerHTML = `
+      <div class="detail-panel-meta-item"><div class="detail-panel-meta-label">Tech</div><div class="detail-panel-meta-value">${svc.tech}</div></div>
+      <div class="detail-panel-meta-item"><div class="detail-panel-meta-label">Port</div><div class="detail-panel-meta-value">${svc.port}</div></div>
+      <div class="detail-panel-meta-item"><div class="detail-panel-meta-label">VPC / Zone</div><div class="detail-panel-meta-value">${svc.vpc}</div></div>
+      <div class="detail-panel-meta-item"><div class="detail-panel-meta-label">Category</div><div class="detail-panel-meta-value">${svc.type}</div></div>
+    `;
+    descEl.textContent = svc.desc;
+
+    const out = connections.filter(c => c.from === id);
+    const inc = connections.filter(c => c.to === id);
+
+    outEl.innerHTML = out.length
+      ? out.map(c => {
+          const target = SERVICES[c.to];
+          return `<div class="detail-panel-conn"><span class="detail-panel-conn-arrow">→</span> ${target ? target.name : c.to} <span class="detail-panel-conn-label">${KIND_LABEL[c.kind] || c.kind}</span></div>`;
+        }).join('')
+      : '<div class="detail-panel-conn" style="color:var(--gray-400);">No outgoing connections.</div>';
+
+    inEl.innerHTML = inc.length
+      ? inc.map(c => {
+          const source = SERVICES[c.from];
+          return `<div class="detail-panel-conn"><span class="detail-panel-conn-arrow">←</span> ${source ? source.name : c.from} <span class="detail-panel-conn-label">${KIND_LABEL[c.kind] || c.kind}</span></div>`;
+        }).join('')
+      : '<div class="detail-panel-conn" style="color:var(--gray-400);">No incoming connections.</div>';
+
+    outSection.style.display = '';
+    inSection.style.display = '';
+    panel.classList.add('open');
+    overlay.classList.add('open');
+    panel.setAttribute('aria-hidden', 'false');
+  }
+  function closeDetail() {
+    panel.classList.remove('open');
+    overlay.classList.remove('open');
+    panel.setAttribute('aria-hidden', 'true');
+  }
+  panelClose.addEventListener('click', closeDetail);
+  overlay.addEventListener('click', closeDetail);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDetail(); });
+
+  // ───── Click empty area of map to clear highlights ─────
+  document.getElementById('serviceMap').addEventListener('click', (e) => {
+    if (!e.target.closest('.orb')) clearHighlight();
+  });
+
+  // ───── Zoom controls ─────
+  const zoomLayer  = document.querySelector('.map-zoom-layer');
+  const zoomLabel  = document.getElementById('mapZoomLabel');
+  let zoomLevel = 1;
+  const ZOOM_STEP = 0.15, ZOOM_MIN = 0.4, ZOOM_MAX = 2.5;
+
+  function applyZoom() {
+    zoomLayer.style.transform = `scale(${zoomLevel})`;
+    zoomLabel.textContent = Math.round(zoomLevel * 100) + '%';
+  }
+  document.getElementById('mapZoomIn').addEventListener('click', () => {
+    zoomLevel = Math.min(ZOOM_MAX, +(zoomLevel + ZOOM_STEP).toFixed(2));
+    applyZoom();
+  });
+  document.getElementById('mapZoomOut').addEventListener('click', () => {
+    zoomLevel = Math.max(ZOOM_MIN, +(zoomLevel - ZOOM_STEP).toFixed(2));
+    applyZoom();
+  });
+  document.getElementById('mapZoomReset').addEventListener('click', () => {
+    zoomLevel = 1;
+    applyZoom();
+  });
+
+  // ───── Fullscreen toggle ─────
+  const fsBtn = document.getElementById('mapFullscreen');
+
+  function isFullscreen() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement ||
+              mapWrap.classList.contains('is-fullscreen'));
+  }
+  function enterFS() {
+    if (mapWrap.requestFullscreen)        { mapWrap.requestFullscreen(); }
+    else if (mapWrap.webkitRequestFullscreen) { mapWrap.webkitRequestFullscreen(); }
+    else { mapWrap.classList.add('is-fullscreen'); document.body.classList.add('map-fullscreen-active'); }
+  }
+  function exitFS() {
+    if (document.exitFullscreen)          { document.exitFullscreen(); }
+    else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
+    else { mapWrap.classList.remove('is-fullscreen'); document.body.classList.remove('map-fullscreen-active'); }
+  }
+  fsBtn.addEventListener('click', () => { isFullscreen() ? exitFS() : enterFS(); });
+
+  function onFSChange() {
+    const active = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    mapWrap.classList.toggle('is-fullscreen', active);
+    document.body.classList.toggle('map-fullscreen-active', active);
+  }
+  document.addEventListener('fullscreenchange', onFSChange);
+  document.addEventListener('webkitfullscreenchange', onFSChange);
+})();
+</script>
+</body>
+</html>
