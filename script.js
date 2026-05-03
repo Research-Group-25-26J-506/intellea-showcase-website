@@ -70,80 +70,119 @@ function initThreeHero() {
 
   /* ── DNA Double Helix ── */
   const dnaGroup = new THREE.Group();
-  dnaGroup.position.set(-28, 2, -10);
+  dnaGroup.position.set(-36, 4, -18);
   scene.add(dnaGroup);
 
   const strandPts1 = [], strandPts2 = [];
-  for (let i = 0; i < 120; i++) {
-    const t = (i / 120) * Math.PI * 6;
-    const y = (i / 120) * 16 - 8;
-    strandPts1.push(new THREE.Vector3(Math.cos(t) * 2, y, Math.sin(t) * 2));
-    strandPts2.push(new THREE.Vector3(Math.cos(t + Math.PI) * 2, y, Math.sin(t + Math.PI) * 2));
+  for (let i = 0; i < 160; i++) {
+    const t = (i / 160) * Math.PI * 8;
+    const y = (i / 160) * 24 - 12;
+    strandPts1.push(new THREE.Vector3(Math.cos(t) * 3, y, Math.sin(t) * 3));
+    strandPts2.push(new THREE.Vector3(Math.cos(t + Math.PI) * 3, y, Math.sin(t + Math.PI) * 3));
   }
-  const strandMat = new THREE.LineBasicMaterial({ color: 0x60A5FA, transparent: true, opacity: 0.35 });
+  const strandMat = new THREE.LineBasicMaterial({ color: 0x60A5FA, transparent: true, opacity: 0.45 });
   dnaGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(strandPts1), strandMat));
   dnaGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(strandPts2), strandMat));
-  const rungMat = new THREE.LineBasicMaterial({ color: 0x93C5FD, transparent: true, opacity: 0.15 });
-  for (let i = 0; i < 120; i += 6) {
+  const rungMat = new THREE.LineBasicMaterial({ color: 0x93C5FD, transparent: true, opacity: 0.2 });
+  for (let i = 0; i < 160; i += 6) {
     dnaGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([strandPts1[i], strandPts2[i]]), rungMat));
   }
-  addPhysicsObject(dnaGroup, { opacity: 0.35, isGroup: true, repelRadius: 14 });
+  addPhysicsObject(dnaGroup, { opacity: 0.45, isGroup: true, repelRadius: 16 });
 
-  /* ── Atom Model ── */
+  /* ── Atom Model (large, primary) ── */
   const atomGroup = new THREE.Group();
-  atomGroup.position.set(18, 6, -5);
+  atomGroup.position.set(28, 8, -12);
   scene.add(atomGroup);
 
   const nucleus = new THREE.Mesh(
-    new THREE.IcosahedronGeometry(1, 2),
-    new THREE.MeshBasicMaterial({ color: 0x60A5FA, wireframe: true, transparent: true, opacity: 0.5 })
+    new THREE.IcosahedronGeometry(2.5, 2),
+    new THREE.MeshBasicMaterial({ color: 0x60A5FA, wireframe: true, transparent: true, opacity: 0.6 })
   );
   atomGroup.add(nucleus);
+  // Inner glow sphere
+  atomGroup.add(new THREE.Mesh(
+    new THREE.SphereGeometry(1.8, 16, 16),
+    new THREE.MeshBasicMaterial({ color: 0x3B82F6, transparent: true, opacity: 0.08 })
+  ));
 
   const orbits = [];
-  for (let i = 0; i < 3; i++) {
+  const orbitAngles = [0, Math.PI * 2 / 5, Math.PI * 4 / 5, Math.PI * 6 / 5, Math.PI * 8 / 5];
+  for (let i = 0; i < 5; i++) {
     const oGroup = new THREE.Group();
-    oGroup.rotation.x = [0, Math.PI / 3, -Math.PI / 3][i];
-    oGroup.rotation.y = [0, Math.PI / 4, -Math.PI / 4][i];
+    oGroup.rotation.x = [0, Math.PI/3, -Math.PI/3, Math.PI/5, -Math.PI/5][i];
+    oGroup.rotation.y = [0, Math.PI/4, -Math.PI/4, Math.PI/2, -Math.PI/2][i];
+    oGroup.rotation.z = [0, 0, 0, Math.PI/6, -Math.PI/6][i];
     atomGroup.add(oGroup);
+    const orbitR = 9 + i * 0.5;
     oGroup.add(new THREE.Mesh(
-      new THREE.TorusGeometry(4.5, 0.03, 8, 80),
-      new THREE.MeshBasicMaterial({ color: 0x3B82F6, transparent: true, opacity: 0.15 })
+      new THREE.TorusGeometry(orbitR, 0.05, 8, 120),
+      new THREE.MeshBasicMaterial({ color: 0x3B82F6, transparent: true, opacity: 0.18 })
     ));
     const electron = new THREE.Mesh(
-      new THREE.SphereGeometry(0.25, 8, 8),
-      new THREE.MeshBasicMaterial({ color: 0xBFDBFE, transparent: true, opacity: 0.9 })
+      new THREE.SphereGeometry(0.45, 10, 10),
+      new THREE.MeshBasicMaterial({ color: 0xBFDBFE, transparent: true, opacity: 0.95 })
     );
     oGroup.add(electron);
-    orbits.push({ group: oGroup, electron, radius: 4.5, speed: 0.7 + i * 0.3, angle: (Math.PI * 2 / 3) * i });
+    orbits.push({ group: oGroup, electron, radius: orbitR, speed: 0.5 + i * 0.25, angle: orbitAngles[i] });
   }
-  addPhysicsObject(atomGroup, { opacity: 0.5, isGroup: true, repelRadius: 12 });
+  addPhysicsObject(atomGroup, { opacity: 0.6, isGroup: true, repelRadius: 18 });
+
+  /* ── Atom Model (secondary, left side) ── */
+  const atomGroup2 = new THREE.Group();
+  atomGroup2.position.set(-30, -10, -16);
+  scene.add(atomGroup2);
+
+  const nucleus2 = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(1.6, 2),
+    new THREE.MeshBasicMaterial({ color: 0x93C5FD, wireframe: true, transparent: true, opacity: 0.5 })
+  );
+  atomGroup2.add(nucleus2);
+
+  const orbits2 = [];
+  for (let i = 0; i < 3; i++) {
+    const oGroup2 = new THREE.Group();
+    oGroup2.rotation.x = [Math.PI/6, -Math.PI/4, Math.PI/2.5][i];
+    oGroup2.rotation.y = [Math.PI/5, Math.PI/3, -Math.PI/4][i];
+    atomGroup2.add(oGroup2);
+    const r2 = 6 + i * 0.4;
+    oGroup2.add(new THREE.Mesh(
+      new THREE.TorusGeometry(r2, 0.04, 8, 100),
+      new THREE.MeshBasicMaterial({ color: 0x60A5FA, transparent: true, opacity: 0.14 })
+    ));
+    const electron2 = new THREE.Mesh(
+      new THREE.SphereGeometry(0.35, 8, 8),
+      new THREE.MeshBasicMaterial({ color: 0xBFDBFE, transparent: true, opacity: 0.9 })
+    );
+    oGroup2.add(electron2);
+    orbits2.push({ group: oGroup2, electron: electron2, radius: r2, speed: 0.6 + i * 0.35, angle: (Math.PI * 2 / 3) * i });
+  }
+  addPhysicsObject(atomGroup2, { opacity: 0.5, isGroup: true, repelRadius: 14 });
 
   /* ── Wave Function Surface ── */
-  const waveGeo = new THREE.PlaneGeometry(10, 5, 100, 50);
+  const waveGeo = new THREE.PlaneGeometry(16, 8, 120, 60);
   const wavePositions = waveGeo.attributes.position.array;
   for (let i = 0; i < wavePositions.length; i += 3) {
-    wavePositions[i + 2] = Math.sin(wavePositions[i] * 1.5) * Math.cos(wavePositions[i + 1] * 1.5) * 0.6;
+    wavePositions[i + 2] = Math.sin(wavePositions[i] * 1.5) * Math.cos(wavePositions[i + 1] * 1.5) * 0.9;
   }
   waveGeo.computeVertexNormals();
-  const waveMesh = new THREE.Mesh(waveGeo, new THREE.MeshBasicMaterial({ color: 0x3B82F6, wireframe: true, transparent: true, opacity: 0.15 }));
-  waveMesh.position.set(10, -14, -8);
+  const waveMesh = new THREE.Mesh(waveGeo, new THREE.MeshBasicMaterial({ color: 0x3B82F6, wireframe: true, transparent: true, opacity: 0.18 }));
+  waveMesh.position.set(14, -20, -18);
   waveMesh.rotation.x = -0.3;
   scene.add(waveMesh);
-  addPhysicsObject(waveMesh, { opacity: 0.15, repelRadius: 16 });
+  addPhysicsObject(waveMesh, { opacity: 0.18, repelRadius: 18 });
 
   /* ── Crystal Lattice ── */
   const latticeGroup = new THREE.Group();
-  latticeGroup.position.set(28, 14, -16);
+  latticeGroup.position.set(36, 18, -24);
   scene.add(latticeGroup);
-  const latticeNodeMat = new THREE.MeshBasicMaterial({ color: 0x93C5FD, transparent: true, opacity: 0.4 });
-  const latticeLineMat = new THREE.LineBasicMaterial({ color: 0x3B82F6, transparent: true, opacity: 0.12 });
+  const latticeNodeMat = new THREE.MeshBasicMaterial({ color: 0x93C5FD, transparent: true, opacity: 0.5 });
+  const latticeLineMat = new THREE.LineBasicMaterial({ color: 0x3B82F6, transparent: true, opacity: 0.16 });
   const latticeNodes = [];
-  for (let x = 0; x < 3; x++) {
-    for (let y = 0; y < 3; y++) {
-      for (let z = 0; z < 3; z++) {
-        const pos = new THREE.Vector3((x - 1) * 1.8, (y - 1) * 1.8, (z - 1) * 1.8);
-        const node = new THREE.Mesh(new THREE.SphereGeometry(0.12, 6, 6), latticeNodeMat);
+  for (let x = 0; x < 4; x++) {
+    for (let y = 0; y < 4; y++) {
+      for (let z = 0; z < 4; z++) {
+        const pos = new THREE.Vector3((x - 1.5) * 2.4, (y - 1.5) * 2.4, (z - 1.5) * 2.4);
+        const node = new THREE.Mesh(new THREE.SphereGeometry(0.18, 6, 6), latticeNodeMat);
         node.position.copy(pos);
         latticeGroup.add(node);
         latticeNodes.push(pos);
@@ -152,12 +191,12 @@ function initThreeHero() {
   }
   for (let i = 0; i < latticeNodes.length; i++) {
     for (let j = i + 1; j < latticeNodes.length; j++) {
-      if (latticeNodes[i].distanceTo(latticeNodes[j]) <= 1.9) {
+      if (latticeNodes[i].distanceTo(latticeNodes[j]) <= 2.5) {
         latticeGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([latticeNodes[i], latticeNodes[j]]), latticeLineMat));
       }
     }
   }
-  addPhysicsObject(latticeGroup, { opacity: 0.4, isGroup: true, repelRadius: 10 });
+  addPhysicsObject(latticeGroup, { opacity: 0.5, isGroup: true, repelRadius: 14 });
 
   /* ── Large spread-out wireframe shapes ── */
   function createWireframe(geo, color, pos, opacity) {
@@ -167,34 +206,32 @@ function initThreeHero() {
     return addPhysicsObject(mesh, { opacity: opacity || 0.25 });
   }
 
-  createWireframe(new THREE.IcosahedronGeometry(5.5, 1), 0x3B82F6, new THREE.Vector3(-16, 14, -18));
-  createWireframe(new THREE.OctahedronGeometry(4, 0), 0x60A5FA, new THREE.Vector3(30, -8, -14));
-  createWireframe(new THREE.TorusKnotGeometry(3, 0.7, 80, 10), 0x2563EB, new THREE.Vector3(-12, -12, -10), 0.2);
-  createWireframe(new THREE.DodecahedronGeometry(3, 0), 0x93C5FD, new THREE.Vector3(5, 18, -20));
-  createWireframe(new THREE.TorusGeometry(3.5, 0.8, 12, 40), 0x1D4ED8, new THREE.Vector3(-26, -10, -18), 0.18);
-  createWireframe(new THREE.TetrahedronGeometry(3.5, 0), 0x1E40AF, new THREE.Vector3(-8, 12, -6));
-  createWireframe(new THREE.IcosahedronGeometry(2.5, 2), 0xBFDBFE, new THREE.Vector3(26, 16, -12), 0.2);
-  createWireframe(new THREE.ConeGeometry(2.5, 5, 6), 0x60A5FA, new THREE.Vector3(-22, 8, -22), 0.18);
-  createWireframe(new THREE.CylinderGeometry(0, 3, 4, 5), 0x3B82F6, new THREE.Vector3(22, -16, -16), 0.18);
+  createWireframe(new THREE.IcosahedronGeometry(7, 1),          0x3B82F6, new THREE.Vector3(-32, 18, -28), 0.18);
+  createWireframe(new THREE.OctahedronGeometry(5, 0),            0x60A5FA, new THREE.Vector3(36, -14, -24), 0.16);
+  createWireframe(new THREE.TorusKnotGeometry(4.5, 0.9, 90, 10), 0x2563EB, new THREE.Vector3(-28, -18, -22), 0.15);
+  createWireframe(new THREE.DodecahedronGeometry(4.5, 0),        0x93C5FD, new THREE.Vector3(8, 24, -30), 0.14);
+  createWireframe(new THREE.TorusGeometry(5, 1.0, 12, 50),       0x1D4ED8, new THREE.Vector3(-36, -8, -26), 0.14);
+  createWireframe(new THREE.TetrahedronGeometry(5, 0),           0x1E40AF, new THREE.Vector3(34, 20, -26), 0.16);
+  createWireframe(new THREE.ConeGeometry(3.5, 7, 6),             0x60A5FA, new THREE.Vector3(-10, -24, -28), 0.14);
 
   /* ── Particle Network ── */
   const nodeGroup = new THREE.Group();
   scene.add(nodeGroup);
   const netNodes = [];
-  for (let i = 0; i < 70; i++) {
-    const s = 0.05 + Math.random() * 0.12;
+  for (let i = 0; i < 60; i++) {
+    const s = 0.05 + Math.random() * 0.14;
     const m = new THREE.Mesh(
       new THREE.SphereGeometry(s, 6, 6),
-      new THREE.MeshBasicMaterial({ color: BLUES[Math.floor(Math.random() * BLUES.length)], transparent: true, opacity: 0.08 + Math.random() * 0.18 })
+      new THREE.MeshBasicMaterial({ color: BLUES[Math.floor(Math.random() * BLUES.length)], transparent: true, opacity: 0.06 + Math.random() * 0.15 })
     );
-    m.position.set((Math.random() - 0.5) * 70, (Math.random() - 0.5) * 40, (Math.random() - 0.5) * 30 - 10);
+    m.position.set((Math.random() - 0.5) * 90, (Math.random() - 0.5) * 55, (Math.random() - 0.5) * 40 - 15);
     nodeGroup.add(m);
     netNodes.push(m);
   }
-  const netLineMat = new THREE.LineBasicMaterial({ color: 0x3B82F6, transparent: true, opacity: 0.04 });
+  const netLineMat = new THREE.LineBasicMaterial({ color: 0x3B82F6, transparent: true, opacity: 0.03 });
   for (let i = 0; i < netNodes.length; i++) {
     for (let j = i + 1; j < netNodes.length; j++) {
-      if (netNodes[i].position.distanceTo(netNodes[j].position) < 12) {
+      if (netNodes[i].position.distanceTo(netNodes[j].position) < 14) {
         nodeGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([netNodes[i].position.clone(), netNodes[j].position.clone()]), netLineMat));
       }
     }
@@ -296,11 +333,16 @@ function initThreeHero() {
       o.electron.position.x = Math.cos(o.angle) * o.radius;
       o.electron.position.z = Math.sin(o.angle) * o.radius;
     });
+    orbits2.forEach(o => {
+      o.angle += o.speed * 0.012;
+      o.electron.position.x = Math.cos(o.angle) * o.radius;
+      o.electron.position.z = Math.sin(o.angle) * o.radius;
+    });
 
     /* Wave function animation */
     const wp = waveMesh.geometry.attributes.position.array;
     for (let i = 0; i < wp.length; i += 3) {
-      wp[i + 2] = Math.sin(waveBasePositions[i] * 1.5 + time * 2) * Math.cos(waveBasePositions[i + 1] * 1.5 + time) * 0.6;
+      wp[i + 2] = Math.sin(waveBasePositions[i] * 1.5 + time * 2) * Math.cos(waveBasePositions[i + 1] * 1.5 + time) * 0.9;
     }
     waveMesh.geometry.attributes.position.needsUpdate = true;
 
