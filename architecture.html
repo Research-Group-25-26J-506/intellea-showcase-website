@@ -607,7 +607,7 @@
     background: #fff;
     box-shadow: -20px 0 60px -10px rgba(0,0,0,0.2);
     transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    z-index: 1100;
+    z-index: 9600;
     overflow-y: auto;
     border-left: 1px solid var(--gray-200);
   }
@@ -730,7 +730,7 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s;
-    z-index: 1099;
+    z-index: 9500;
   }
   .detail-overlay.open { opacity: 1; pointer-events: auto; }
 
@@ -1076,8 +1076,8 @@
             <!-- Users → ALBs -->
             <path class="link link-https" d="M 200 95 C 200 130, 130 130, 130 215" marker-end="url(#arrow-https)" data-from="users" data-to="alb-core"/>
             <path class="link link-https" d="M 200 95 C 280 130, 330 150, 330 215" marker-end="url(#arrow-https)" data-from="users" data-to="alb-atlas"/>
-            <path class="link link-https" d="M 1200 95 C 1200 130, 1010 150, 1010 270" marker-end="url(#arrow-https)" data-from="users" data-to="text-emotion"/>
-            <path class="link link-https" d="M 1200 95 C 1200 130, 1200 130, 1200 720" marker-end="url(#arrow-https)" data-from="users" data-to="face-recognition"/>
+            <path class="link link-https" d="M 220 88 C 600 88, 1010 160, 1010 290" marker-end="url(#arrow-https)" data-from="users" data-to="text-emotion"/>
+            <path class="link link-https" d="M 220 90 C 700 90, 1200 400, 1200 711" marker-end="url(#arrow-https)" data-from="users" data-to="face-recognition"/>
 
             <!-- ALB → backend services -->
             <path class="link link-https" d="M 130 250 L 130 350" marker-end="url(#arrow-https)" data-from="alb-core" data-to="frontend"/>
@@ -1093,25 +1093,25 @@
             <path class="link link-rest link-flow" d="M 320 350 C 280 400, 230 480, 220 540" marker-end="url(#arrow-rest)" data-from="core-backend" data-to="atlas-module"/>
             <path class="link link-rest link-flow" d="M 350 360 C 450 410, 540 470, 580 540" marker-end="url(#arrow-rest)" data-from="core-backend" data-to="sage"/>
             <path class="link link-db link-flow" d="M 320 380 C 280 600, 240 850, 240 1040" marker-end="url(#arrow-db)" data-from="core-backend" data-to="mongodb"/>
-            <path class="link link-kafka-prod link-flow" d="M 360 380 C 600 600, 820 850, 880 1030" marker-end="url(#arrow-kafka)" data-from="core-backend" data-to="kafka"/>
+            <path class="link link-kafka-prod link-flow" d="M 340 379 C 600 600, 850 850, 900 1033" marker-end="url(#arrow-kafka)" data-from="core-backend" data-to="kafka"/>
 
             <!-- Notification connections -->
-            <path class="link link-kafka-cons link-flow" d="M 880 1030 C 820 800, 620 580, 560 380" marker-end="url(#arrow-kafka)" data-from="kafka" data-to="notification"/>
-            <path class="link link-email link-flow" d="M 560 380 C 700 600, 1020 1010, 1130 1090" marker-end="url(#arrow-email)" data-from="notification" data-to="gmail"/>
+            <path class="link link-kafka-cons link-flow" d="M 900 1033 C 820 800, 620 580, 540 377" marker-end="url(#arrow-kafka)" data-from="kafka" data-to="notification"/>
+            <path class="link link-email link-flow" d="M 540 377 C 700 600, 1020 960, 1130 1033" marker-end="url(#arrow-email)" data-from="notification" data-to="gmail"/>
 
             <!-- ATLAS module → External -->
             <path class="link link-llm link-flow" d="M 200 580 C 250 800, 350 990, 410 1180" marker-end="url(#arrow-llm)" data-from="atlas-module" data-to="openai"/>
             <path class="link link-llm link-flow" d="M 240 580 C 350 800, 540 1000, 600 1180" marker-end="url(#arrow-llm)" data-from="atlas-module" data-to="elevenlabs"/>
             <path class="link link-cache link-flow" d="M 220 580 C 240 750, 320 950, 410 1040" marker-end="url(#arrow-cache)" data-from="atlas-module" data-to="redis-ext"/>
             <path class="link link-db link-flow" d="M 200 580 C 220 720, 540 950, 580 1040" marker-end="url(#arrow-db)" data-from="atlas-module" data-to="pinecone"/>
-            <path class="link link-storage link-flow" d="M 200 580 C 100 800, 100 1010, 100 1090" marker-end="url(#arrow-storage)" data-from="atlas-module" data-to="firebase-storage"/>
+            <path class="link link-storage link-flow" d="M 210 588 C 100 800, 100 960, 100 1033" marker-end="url(#arrow-storage)" data-from="atlas-module" data-to="firebase-storage"/>
 
             <!-- Frontend → Firebase Auth -->
             <path class="link link-auth link-flow" d="M 130 380 C 100 600, 100 950, 100 1040" marker-end="url(#arrow-auth)" data-from="frontend" data-to="firebase-storage"/>
 
             <!-- Prometheus scrape lines -->
             <path class="link link-scrape link-flow" d="M 380 740 C 380 600, 350 460, 320 380" marker-end="url(#arrow-scrape)" data-from="prometheus" data-to="core-backend"/>
-            <path class="link link-scrape link-flow" d="M 380 740 C 380 620, 240 530, 200 580" marker-end="url(#arrow-scrape)" data-from="prometheus" data-to="atlas-module"/>
+            <path class="link link-scrape link-flow" d="M 380 733 C 350 670, 230 640, 220 588" marker-end="url(#arrow-scrape)" data-from="prometheus" data-to="atlas-module"/>
             <path class="link link-scrape link-flow" d="M 380 740 C 460 660, 540 600, 580 580" marker-end="url(#arrow-scrape)" data-from="prometheus" data-to="sage"/>
             <path class="link link-scrape link-flow" d="M 380 740 C 540 660, 700 600, 770 580" marker-end="url(#arrow-scrape)" data-from="prometheus" data-to="block-ide"/>
             <path class="link link-scrape link-flow" d="M 380 740 C 460 600, 600 410, 720 360" marker-end="url(#arrow-scrape)" data-from="prometheus" data-to="nginx-exporter"/>
@@ -1130,7 +1130,7 @@
             <path class="link link-cache link-flow" d="M 1180 440 C 1100 480, 1030 520, 1010 540" marker-end="url(#arrow-cache)" data-from="redis-railway" data-to="ffnn" opacity="0.3"/>
 
             <!-- Core Backend → Emotion Detection (websocket) -->
-            <path class="link link-rest link-flow" d="M 380 360 C 800 360, 1280 480, 1390 540" marker-end="url(#arrow-rest)" data-from="core-backend" data-to="websocket"/>
+            <path class="link link-rest link-flow" d="M 354 355 C 800 355, 1300 480, 1370 555" marker-end="url(#arrow-rest)" data-from="core-backend" data-to="websocket"/>
 
             <!-- CI/CD: GitHub → ECR → ECS -->
             <path class="link link-cicd link-flow" d="M 880 90 L 1020 90" marker-end="url(#arrow-cicd)" data-from="github" data-to="cicd"/>
