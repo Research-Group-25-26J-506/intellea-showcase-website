@@ -203,7 +203,7 @@
       }
 
       // Replace 'YOUR_SERVICE_ID' with your EmailJS Service ID
-      emailjs.send('service_qpauc2m', 'oQpn4TvSLcbCOQ5T6', {
+      emailjs.send('service_qpauc2m', 'template_zun0cuj', {
         from_name:    firstName + ' ' + lastName,
         from_email:   email,
         organization: organization,
@@ -220,7 +220,7 @@
       }).catch((err) => {
         console.error('EmailJS error:', err);
         if (success) {
-          success.textContent = '✗ Something went wrong. Please email us directly at intellea.research@my.sliit.lk';
+          success.textContent = '✗ Something went wrong. Please email us directly at asirijayawardena920@gmail.com';
           success.style.color = '#f87171';
           success.classList.add('show');
           setTimeout(() => {
