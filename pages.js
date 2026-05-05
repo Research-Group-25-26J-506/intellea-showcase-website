@@ -184,12 +184,56 @@
   if (form) {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      const success = document.getElementById('formSuccess');
-      if (success) {
-        success.classList.add('show');
-        form.reset();
-        setTimeout(() => success.classList.remove('show'), 5000);
+
+      const submitBtn = form.querySelector('.form-submit');
+      const success   = document.getElementById('formSuccess');
+
+      // Gather field values
+      const firstName    = document.getElementById('firstName').value.trim();
+      const lastName     = document.getElementById('lastName').value.trim();
+      const email        = document.getElementById('email').value.trim();
+      const organization = document.getElementById('organization').value.trim() || '—';
+      const topic        = document.getElementById('topic').value;
+      const message      = document.getElementById('message').value.trim();
+
+      // Disable button while sending
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending…';
       }
+
+      // Replace 'YOUR_SERVICE_ID' with your EmailJS Service ID
+      emailjs.send('service_qpauc2m', 'oQpn4TvSLcbCOQ5T6', {
+        from_name:    firstName + ' ' + lastName,
+        from_email:   email,
+        organization: organization,
+        topic:        topic,
+        message:      message,
+        reply_to:     email,
+      }).then(() => {
+        if (success) {
+          success.textContent = '✓ Thank you! Your message has been sent. We\'ll reply within two working days.';
+          success.classList.add('show');
+        }
+        form.reset();
+        setTimeout(() => success && success.classList.remove('show'), 6000);
+      }).catch((err) => {
+        console.error('EmailJS error:', err);
+        if (success) {
+          success.textContent = '✗ Something went wrong. Please email us directly at intellea.research@my.sliit.lk';
+          success.style.color = '#f87171';
+          success.classList.add('show');
+          setTimeout(() => {
+            success.classList.remove('show');
+            success.style.color = '';
+          }, 7000);
+        }
+      }).finally(() => {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Send message <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>';
+        }
+      });
     });
   }
 })();
